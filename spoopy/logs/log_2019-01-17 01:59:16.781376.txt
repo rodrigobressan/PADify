@@ -1,0 +1,5 @@
+[I] [2019-01-17 01:59:19.892409] [Run pipeline (run_pipeline()) method invocation. Parameters below:]
+[I] [2019-01-17 01:59:20.628188] [    Fetching items from dataset]
+[I] [2019-01-17 01:59:21.149913] [    Dataset root: ../data]
+[I] [2019-01-17 01:59:21.559081] [    Dataset alias: sample_data]
+[I] [2019-01-17 01:59:21.896925] [    Data type: real]

@@ -1,0 +1,99 @@
+Determining if the Q_WS_X11 exist failed with the following output:
+Change Dir: /Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/opt/local/bin/gmake" "cmTC_9aa0e/fast"
+/opt/local/bin/gmake -f CMakeFiles/cmTC_9aa0e.dir/build.make CMakeFiles/cmTC_9aa0e.dir/build
+gmake[1]: Entering directory '/Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_9aa0e.dir/CheckSymbolExists.cxx.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++    -I/opt/local/libexec/qt4/include   -o CMakeFiles/cmTC_9aa0e.dir/CheckSymbolExists.cxx.o -c /Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+/Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: use of undeclared identifier 'Q_WS_X11'
+  return ((int*)(&Q_WS_X11))[argc];
+                  ^
+1 error generated.
+CMakeFiles/cmTC_9aa0e.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_9aa0e.dir/CheckSymbolExists.cxx.o' failed
+gmake[1]: *** [CMakeFiles/cmTC_9aa0e.dir/CheckSymbolExists.cxx.o] Error 1
+gmake[1]: Leaving directory '/Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_9aa0e/fast' failed
+gmake: *** [cmTC_9aa0e/fast] Error 2
+
+File /Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
+/* */
+#include <QtCore/qglobal.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef Q_WS_X11
+  return ((int*)(&Q_WS_X11))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the Q_WS_WIN exist failed with the following output:
+Change Dir: /Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/opt/local/bin/gmake" "cmTC_8bef9/fast"
+/opt/local/bin/gmake -f CMakeFiles/cmTC_8bef9.dir/build.make CMakeFiles/cmTC_8bef9.dir/build
+gmake[1]: Entering directory '/Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_8bef9.dir/CheckSymbolExists.cxx.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++    -I/opt/local/libexec/qt4/include   -o CMakeFiles/cmTC_8bef9.dir/CheckSymbolExists.cxx.o -c /Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+/Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: use of undeclared identifier 'Q_WS_WIN'
+  return ((int*)(&Q_WS_WIN))[argc];
+                  ^
+1 error generated.
+CMakeFiles/cmTC_8bef9.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_8bef9.dir/CheckSymbolExists.cxx.o' failed
+gmake[1]: *** [CMakeFiles/cmTC_8bef9.dir/CheckSymbolExists.cxx.o] Error 1
+gmake[1]: Leaving directory '/Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_8bef9/fast' failed
+gmake: *** [cmTC_8bef9/fast] Error 2
+
+File /Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
+/* */
+#include <QtCore/qglobal.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef Q_WS_WIN
+  return ((int*)(&Q_WS_WIN))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the Q_WS_QWS exist failed with the following output:
+Change Dir: /Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/opt/local/bin/gmake" "cmTC_dbcf4/fast"
+/opt/local/bin/gmake -f CMakeFiles/cmTC_dbcf4.dir/build.make CMakeFiles/cmTC_dbcf4.dir/build
+gmake[1]: Entering directory '/Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_dbcf4.dir/CheckSymbolExists.cxx.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++    -I/opt/local/libexec/qt4/include   -o CMakeFiles/cmTC_dbcf4.dir/CheckSymbolExists.cxx.o -c /Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+/Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: use of undeclared identifier 'Q_WS_QWS'
+  return ((int*)(&Q_WS_QWS))[argc];
+                  ^
+1 error generated.
+CMakeFiles/cmTC_dbcf4.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_dbcf4.dir/CheckSymbolExists.cxx.o' failed
+gmake[1]: *** [CMakeFiles/cmTC_dbcf4.dir/CheckSymbolExists.cxx.o] Error 1
+gmake[1]: Leaving directory '/Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_dbcf4/fast' failed
+gmake: *** [cmTC_dbcf4/fast] Error 2
+
+File /Users/tiagojc/Documents/github/IBTSFIF/illuminants/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
+/* */
+#include <QtCore/qglobal.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef Q_WS_QWS
+  return ((int*)(&Q_WS_QWS))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+

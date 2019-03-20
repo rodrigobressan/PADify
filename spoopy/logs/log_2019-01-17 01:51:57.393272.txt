@@ -1,0 +1,8 @@
+[I] [2019-01-17 01:51:57.393394] [Run pipeline (run_pipeline()) method invocation. Parameters below:]
+[I] [2019-01-17 01:51:57.393486] [    Fetching items from dataset]
+[I] [2019-01-17 01:51:57.393547] [    Dataset root: ../data]
+[I] [2019-01-17 01:51:57.393588] [    Dataset alias: sample_data]
+[I] [2019-01-17 01:51:57.393627] [    Data type: real]
+[I] [2019-01-17 01:51:58.454065] [Total items fetched: 2]
+[I] [2019-01-17 01:51:58.454171] [Percentage done: 0.0%]
+[I] [2019-01-17 01:51:58.508781] [Percentage done: 50.0%]

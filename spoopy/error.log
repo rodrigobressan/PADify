@@ -1,0 +1,14 @@
+INFO:werkzeug: * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+INFO:werkzeug:127.0.0.1 - - [23/Oct/2018 20:28:55] "[37mPOST /upload_illumination HTTP/1.1[0m" 200 -
+INFO:werkzeug: * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+INFO:werkzeug:127.0.0.1 - - [23/Oct/2018 20:36:28] "[1m[35mPOST /upload_illumination HTTP/1.1[0m" 500 -
+INFO:werkzeug: * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+INFO:werkzeug: * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+INFO:werkzeug:127.0.0.1 - - [23/Oct/2018 21:09:53] "[37mPOST /upload_illumination HTTP/1.1[0m" 200 -
+INFO:werkzeug: * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+INFO:werkzeug: * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+INFO:werkzeug:127.0.0.1 - - [23/Oct/2018 21:19:06] "[37mPOST /upload_illumination HTTP/1.1[0m" 200 -
+INFO:werkzeug:127.0.0.1 - - [23/Oct/2018 21:19:32] "[37mPOST /upload_illumination HTTP/1.1[0m" 200 -
+INFO:werkzeug:127.0.0.1 - - [23/Oct/2018 21:19:56] "[37mPOST /upload_illumination HTTP/1.1[0m" 200 -
+INFO:werkzeug:127.0.0.1 - - [23/Oct/2018 21:20:10] "[37mPOST /upload_illumination HTTP/1.1[0m" 200 -
+INFO:werkzeug:127.0.0.1 - - [23/Oct/2018 21:20:51] "[37mPOST /upload_illumination HTTP/1.1[0m" 200 -

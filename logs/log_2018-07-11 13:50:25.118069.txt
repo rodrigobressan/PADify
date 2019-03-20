@@ -1,0 +1,7 @@
+[I] [2018-07-11 13:50:25.118579] [Run pipeline (run_pipeline()) method invocation. Parameters below:]
+[I] [2018-07-11 13:50:25.118930] [    Fetching items from dataset]
+[I] [2018-07-11 13:50:25.119153] [    Dataset root: /Users/rodrigobresan/Documents/dev/github/anti_spoofing/spoopy/data/nuaa/train/fake]
+[I] [2018-07-11 13:50:25.119368] [    Dataset alias: nuaa]
+[I] [2018-07-11 13:50:25.119576] [    Data type: fake]
+[I] [2018-07-11 13:50:27.561096] [Total items fetched: 9]
+[I] [2018-07-11 13:50:27.561488] [Percentage done: 0.0%]

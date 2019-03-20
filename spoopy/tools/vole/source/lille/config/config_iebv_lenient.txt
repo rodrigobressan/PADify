@@ -1,0 +1,17 @@
+[iebv_seg_patches]
+strategy=largest
+size_x=40
+size_y=10
+number_tries=1000
+
+
+[iebv]
+number_patches=200
+random_seed=0
+
+max_intensity=.99607843137254901960
+min_intensity=.00392156862745098039
+min_pixels=20
+minimum_eigenvalue_ratio=0.1
+minimum_eigenvector_slope=0.0003
+maximum_eigenvector_slope=10.0
