@@ -1,20 +1,13 @@
-<img src="spoopy/docs/figs/logo.png">
+<p align="center"><img src="spoopy/docs/figs/logo.png"></p>
 
-# PADify
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/bresan/spoopy/graphs/commit-activity)  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 PADify (pronounced as /ˈpædfaɪ/) is a project to perform presentation attack detection (PAD) on publicly available datasets by using different intrinsic image properties along with Convolutional Neural Networks.
 
-TODO:
-
-- Travis;
-- Unit tests;
-- PyPi;
-- Examples;
 
 ## Pipeline Overview
-[![Pipeline Overview](https://raw.githubusercontent.com/bresan/spoopy/master/pipeline.png)](https://github.com/bresan/spoopy/blob/master/pipeline.png)
+<p align="center"><img src="spoopy/docs/figs/logo.png"></p>
   <p align="center">
 <sub>Fig 1 - Overview of proposed method</sub>
 
