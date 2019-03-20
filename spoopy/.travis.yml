@@ -1,0 +1,26 @@
+sudo: required
+env:
+language: python
+python:
+- '3.6'
+cache: pip
+before_install:
+- sudo apt-get update
+install:
+- pip install -r requirements.txt
+- pip install pytest pytest-cov
+- pip install codecov
+- pip install mypy
+script:
+- py.test --doctest-modules --cov=spoopy/
+after_success:
+- codecov
+#deploy:
+#  provider: pypi
+#  user: bresan
+#  distributions: sdist bdist_wheel
+#  on:
+#    branch: master
+#  skip_existing: true
+#  password:
+#    secure: PBUNBjPcdcoKu84IXA3RixJaSI/sftRz4yhVXuILDKGSdNWh7wvswVvlqikJUHNUYJe/PHbR3R4W3OxVawfpDE8zrr4FsuulSme9+aPIKxjDGB3x+yqfzPZiCVw+lYyTikocztUWWKMMMYSUyteOuD6C8JsDmyAMv9+OUqZ82cPwfYNFRUI56dz8n9C+Qyc+lLlaIPDbj1rRLW32nygI0DGxJ8ftJOhOuscptD3NBghUKzF9PdWJopJZhPtCSD+t2oqYZEmDjNefn6MPCULSXr0PVPjau8FTBsw28of7taTFO/fPpvXw1i6wGmiCrVuKQg2KL95tohixiKIvOQLwDu05nveKxKVvR+79JnEnF6f7xsAl6jBv3XZ6OWWPc7C6tUMIS1/XzHdllRjY0sdDTwh4LNHVqF/rSIREuT2rA/RRxHz6GvJNwSkC+xW9YvQO/RjVwsa6VcaNVWZVXz2m9ihsjE63gISatCTwBk2+UqHqo4L1bOPHtL5WNfJcp/IW7hdvd89Ynt6vgLl9weZ+f5p9bbknelzl/zdbynRYg1TfBx+DmWPOcYnKUzrqN852AA2GmfcDMYjM4zafdWXb2nWMJl529quZO6jVuFbJ7+HngfwCmWTPpP/na0NxrOtpTyGgGilNLQ3wieElmLRNF9dOaSNTBEjyaDy2UoHEXXQ=
