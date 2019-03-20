@@ -7,7 +7,7 @@ PADify (pronounced as /ˈpædfaɪ/) is a project to perform presentation attack 
 
 
 ## Pipeline Overview
-<p align="center"><img src="spoopy/docs/figs/logo.png"></p>
+<p align="center"><img src="spoopy/docs/figs/pipeline.png"></p>
   <p align="center">
 <sub>Fig 1 - Overview of proposed method</sub>
 
