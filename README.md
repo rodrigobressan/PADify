@@ -1,4 +1,4 @@
-<img width=75% src="spoopy/docs/figs/logo.png">
+<img src="spoopy/docs/figs/logo.png">
 
 # PADify
 
