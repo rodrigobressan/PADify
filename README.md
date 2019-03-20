@@ -6,7 +6,7 @@
 PADify (pronounced as /ˈpædfaɪ/) is a project to perform presentation attack detection (PAD) on publicly available datasets by using different intrinsic image properties along with Convolutional Neural Networks.
 
 ## Presentation Attack Detection
-<p align="center"><img src="spoopy/docs/figs/examples.png"></p>
+<p align="center"><img width="50%"src="spoopy/docs/figs/examples.png"></p>
   <p align="center">
 <sub>Fig 1 - Examples of Presentation Attack Detection</sub>
 
