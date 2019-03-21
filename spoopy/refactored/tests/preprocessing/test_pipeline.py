@@ -209,22 +209,24 @@ class TestIntegrationPipeline(unittest.TestCase):
                                 path_artifact = os.path.join(base_path, artifact)
                                 self.assertTrue(exists(path_artifact))
 
-    def test_preprocessor(self):
-        tasks = [
-            # self.organize_videos_by_subset_and_label,
-            # self.extract_frames_from_videos,
-            # self.extract_maps_from_frames,
-            # self.align_maps,
-            self.separate_maps_by_pai,
-            # self.extract_features,
-            # self.perform_intra_feature_classification,
-            # self.perform_inter_feature_classification
-        ]
-
-        for task in tasks:
-            try:
-                task()
-            except Exception as e:
-                self.fail(e)
-
-        print('All done!')
+    # def test_preprocessor(self):
+    #     tasks = [
+    #         # self.organize_videos_by_subset_and_label,
+    #         # self.extract_frames_from_videos,
+    #         # self.extract_maps_from_frames,
+    #         # self.align_maps,
+    #         self.separate_maps_by_pai,
+    #         # self.extract_features,
+    #         # self.perform_intra_feature_classification,
+    #         # self.perform_inter_feature_classification
+    #     ]
+    #
+    #     for task in tasks:
+    #         try:
+    #             task()
+    #         except Exception as e:
+    #             self.fail(e)
+    #
+    #     print('All done!')
+    def test_sample(self):
+        self.assertEqual(2, 1 + 1)

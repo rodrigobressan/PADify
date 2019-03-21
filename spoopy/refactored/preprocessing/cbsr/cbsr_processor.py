@@ -36,29 +36,30 @@ class CbsrProcessor(Preprocessor):
         """
         for frame_name, prop, label, subset in self.handler.get_frames_aligned(self.aligned_root):
 
-            with ProcessPoolExecutor(max_workers=500) as exec:
-                original_path = join(self.aligned_root, subset, label, prop, frame_name)
+            # with ProcessPoolExecutor() as exec:
+            original_path = join(self.aligned_root, subset, label, prop, frame_name)
 
-                # # move all frames into 'all' folder
-                all_output_path = join(self.separated_pai_root, 'all', subset, label, prop)
-                file_utils.file_helper.copy_file(original_path, all_output_path)
+            # # move all frames into 'all' folder
+            all_output_path = join(self.separated_pai_root, 'all', subset, label, prop)
+            file_utils.file_helper.copy_file(original_path, all_output_path)
 
-                if label == self.default_attack_label:
-                    index_frame = self.get_index_from_name(frame_name)
-                    attack_alias = self.get_attack_type_from_name(index_frame)
+            if label == self.default_attack_label:
+                index_frame = self.get_index_from_name(frame_name)
+                attack_alias = self.get_attack_type_from_name(index_frame)
 
-                    # format: /root/attack_alias/subset/label/property
-                    output_path = join(self.separated_pai_root, attack_alias, subset, label, prop)
-                    exec.submit(self.copy_if_not_exists, original_path, output_path, frame_name)
-                else:
-                    # make a copy into each of the attack folders
-                    for attack_type in self.pai_config.pai_dict:
-                        output_path = join(self.separated_pai_root, attack_type, subset, label, prop)
-                        exec.submit(self.copy_if_not_exists, original_path, output_path, frame_name)
+                # format: /root/attack_alias/subset/label/property
+                output_path = join(self.separated_pai_root, attack_alias, subset, label, prop)
+                self.copy_if_not_exists(original_path, output_path, frame_name)
+            else:
+                # make a copy into each of the attack folders
+                for attack_type in self.pai_config.pai_dict:
+                    output_path = join(self.separated_pai_root, attack_type, subset, label, prop)
+                    self.copy_if_not_exists(original_path, output_path, frame_name)
 
     def copy_if_not_exists(self, original_path: str, output_path: str, file_name: str):
         if not exists(join(output_path, file_name)):
             file_utils.file_helper.copy_file(original_path, output_path)
+            print('copied %s' % file_name)
         else:
             print('%s already moved pai' % file_name)
 
