@@ -33,7 +33,6 @@ class TestIntegrationPipeline(unittest.TestCase):
                                'all/train/attack/%s/2_8_frame_0.%s',
                                'all/train/real/%s/2_1_frame_1.%s']
 
-
     def tearDown(self):
         print("Performing cleanup")
         cleanup = False
@@ -215,8 +214,8 @@ class TestIntegrationPipeline(unittest.TestCase):
             # self.organize_videos_by_subset_and_label,
             # self.extract_frames_from_videos,
             # self.extract_maps_from_frames,
-            self.align_maps,
-            # self.separate_maps_by_pai,
+            # self.align_maps,
+            self.separate_maps_by_pai,
             # self.extract_features,
             # self.perform_intra_feature_classification,
             # self.perform_inter_feature_classification
