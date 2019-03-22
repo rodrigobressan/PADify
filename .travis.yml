@@ -11,10 +11,10 @@ install:
 - pip install pytest pytest-cov
 - pip install codecov
 - pip install mypy
-script:
+#script:
 #- py.test --doctest-modules --cov=spoopy/
-after_success:
-- codecov
+#after_success:
+#- codecov
 #deploy:
 #  provider: pypi
 #  user: bresan
