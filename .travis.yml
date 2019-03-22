@@ -11,8 +11,9 @@ install:
 - pip install pytest pytest-cov
 - pip install codecov
 - pip install mypy
-#script:
-#- py.test --doctest-modules --cov=spoopy/
+- pip install opencv-python
+script:
+- py.test --doctest-modules
 #after_success:
 #- codecov
 #deploy:
