@@ -209,24 +209,108 @@ class TestIntegrationPipeline(unittest.TestCase):
                                 path_artifact = os.path.join(base_path, artifact)
                                 self.assertTrue(exists(path_artifact))
 
-    # def test_preprocessor(self):
-    #     tasks = [
-    #         # self.organize_videos_by_subset_and_label,
-    #         # self.extract_frames_from_videos,
-    #         # self.extract_maps_from_frames,
-    #         # self.align_maps,
-    #         self.separate_maps_by_pai,
-    #         # self.extract_features,
-    #         # self.perform_intra_feature_classification,
-    #         # self.perform_inter_feature_classification
-    #     ]
-    #
-    #     for task in tasks:
-    #         try:
-    #             task()
-    #         except Exception as e:
-    #             self.fail(e)
-    #
-    #     print('All done!')
-    def test_sample(self):
-        self.assertEqual(2, 1 + 1)
+    def print_stats(self, frames_extracted, frames_maps):
+        for prop in self.processor.properties:
+            prop = prop.get_property_alias()
+            size = len(frames_maps[prop])
+            less_perc = (100 * size) / len(frames_extracted)
+            print('%s: %d perc: %d' % (prop, size, less_perc))
+
+    def analyze_extracted_data(self):
+
+        print('Analyzing extracted frames')
+        path_extracted = self.processor.extracted_frames_root
+        extracted_frames = self.processor.handler.get_frames_structured(path_extracted)
+
+        frames_extracted = []
+        for frame, label, subset in extracted_frames:
+            name = '%s_%s_%s' % (frame, label, subset)
+            frames_extracted.append(name)
+
+        print('Size extracted frames: %d' % len(frames_extracted))
+        ############################### 20194 + 6427 + 13824 + 4406
+        print('Analyzing extracted maps')
+        path_maps = self.processor.properties_root
+        frames_maps = self.extract_dicts_props(path_maps)
+        self.print_stats(frames_extracted, frames_maps)
+        ##################################
+        print('Analyzing aligned maps')
+        path_aligned = self.processor.aligned_root
+        frames_aligned = self.extract_dicts_props(path_aligned)
+        self.print_stats(frames_extracted, frames_aligned)
+
+        print('Printing missing')
+
+        for prop in self.processor.properties:
+            prop = prop.get_property_alias()
+            diff = list(set(frames_extracted).symmetric_difference(frames_aligned[prop]))
+        ##################################
+
+        path_separated = self.processor.separated_pai_root
+        pais = os.listdir(path_separated)
+
+        for pai in pais:
+            pai_path = join(path_separated, pai)
+            for subset in os.listdir(pai_path):
+                subset_path = join(pai_path, subset)
+                for label in os.listdir(subset_path):
+                    labels_path = join(subset_path, label)
+                    for prop in os.listdir(labels_path):
+                        prop_path = join(labels_path, prop)
+                        frames = len(os.listdir(prop_path))
+                        print('%s %s %s %s %d' % (pai, subset, label, prop, frames))
+
+        #
+        # path_aligned = self.processor.aligned_root
+        # aligned_frames = self.processor.handler.get_frames_properties(path_aligned)
+        # frames_props = []
+        # for frame, prop, label, subset in aligned_frames:
+        #     name = '%s_%s_%s' % (frame, label, subset)
+        #     frames_props.append(name)
+        #
+        # frames_props = set(frames_props)
+        #
+        # print('size props: %d' % len(frames_props))
+        # diff = list(set(frames_extracted).symmetric_difference(frames_props))
+        # print(len(diff))
+        #
+        # for missing in diff:
+        #     print(missing)
+
+        # pai_list = os.listdir(self.processor.separated_pai_root)
+        # for pai in pai_list:
+        #     print('pai %s' % pai)
+
+    def extract_dicts_props(self, path_maps):
+        extracted_maps = self.processor.handler.get_frames_properties(path_maps)
+        frames_maps = {}
+        for frame, prop, label, subset in extracted_maps:
+            name = '%s_%s_%s' % (frame, label, subset)
+
+            if prop not in frames_maps:
+                frames_maps[prop] = []
+                frames_maps[prop].append(name)
+            else:
+                frames_maps[prop].append(name)
+        return frames_maps
+
+    def test_preprocessor(self):
+        tasks = [
+            # self.organize_videos_by_subset_and_label,
+            # self.extract_frames_from_videos,
+            # self.extract_maps_from_frames,
+            # self.align_maps,
+            # self.separate_maps_by_pai,
+            # self.analyze_extracted_data,
+            self.extract_features,
+            # self.perform_intra_feature_classification,
+            # self.perform_inter_feature_classification
+        ]
+
+        for task in tasks:
+            try:
+                task()
+            except Exception as e:
+                self.fail(e)
+
+        print('All done!')

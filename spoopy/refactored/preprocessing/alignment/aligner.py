@@ -26,11 +26,14 @@ class Aligner():
         frames_original = os.path.join(root_extracted_maps, 'original')
         frame_list = os.listdir(frames_original)
 
-        with ThreadPoolExecutor(max_workers=100) as executor:
-            fs = [executor.submit(self.align_single_frame, root_extracted_maps, frame_name, output_base, properties) for
-                  frame_name in frame_list]
-            concurrent.futures.wait(fs)
-            #
+        with ThreadPoolExecutor() as exec:
+            for frame_name in frame_list:
+                exec.submit(self.align_single_frame, root_extracted_maps, frame_name, output_base, properties)
+        # with ThreadPoolExecutor(max_workers=100) as executor:
+        #     fs = [executor.submit(self.align_single_frame, root_extracted_maps, frame_name, output_base, properties) for
+        #           frame_name in frame_list]
+        #     concurrent.futures.wait(fs)
+        #     #
             # with ProcessPoolExecutor(max_workers=100) as executor:
             #     frame_list = os.listdir(frames_original)
             #
@@ -46,11 +49,11 @@ class Aligner():
             path_frame_aligned = os.path.join(dir_frame_aligned, frame_name)
 
             if not os.path.exists(path_frame_aligned):
-                print('missing align for %s: ' % path_frame_aligned)
+                # print('missing align for %s: ' % path_frame_aligned)
                 is_missing_align = True
 
         if is_missing_align:
-            print('Aligning %s' % frame_name)
+            # print('Aligning %s' % frame_name)
             full_path_frame = os.path.join(base_maps_frames, 'original', frame_name)
             face_angle = face_aligner.align_faces.get_face_angle(full_path_frame, self.detector, self.face_aligner)
             image_fixed_angle = imutils.rotate(cv2.imread(full_path_frame), face_angle)
@@ -58,9 +61,7 @@ class Aligner():
             face_cropper = face_detector.FaceCropper()
             face_coordinates = face_cropper.get_faces_coordinates(image_fixed_angle)
             cropper = ImageCropper(face_cropper, face_coordinates)
-
             for property in properties:
-                with ProcessPoolExecutor as exec:
 
                     try:
                         dir_frame_unaligned = os.path.join(base_maps_frames, property.get_property_alias())
@@ -75,14 +76,14 @@ class Aligner():
                             path_frame_unaligned = os.path.join(dir_frame_unaligned, frame_name)
 
                             aligner = ImageAligner(path_frame_unaligned, face_angle, property.get_frame_extension())
-                            exec.submit(self.align_frame, aligner, cropper, path_frame_aligned)
+                            self.align_frame(aligner, cropper, path_frame_aligned)
                         else:
                             print('already aligned, skipping')
                     except Exception as e:
                         print('Error when trying to align frame ', e)
 
-        else:
-            print('skipping.. %s ' % frame_name)
+        # else:
+            # print('skipping.. %s ' % frame_name)
 
     def align_frame(self, aligner, cropper, path_frame_aligned):
         aligned_img = aligner.align()

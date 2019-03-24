@@ -39,18 +39,18 @@ def get_face_position(image_rotated, detector, fa):
 def get_face_angle(image_path, detector, fa):
     # load the input image, resize it, and convert it to grayscale
     image = cv2.imread(image_path)
-    print(image_path, ' readed, cvtcolor called')
+    # print(image_path, ' readed, cvtcolor called')
     # gray_original = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    print(image_path, ' cvtcolor done')
+    # print(image_path, ' cvtcolor done')
     rects_original = detector(image, 2)
-    print('detector done')
+    # print('detector done')
     if len(rects_original) == 0:
         print('len == 0')
         return 0
 
-    print('before align')
+    # print('before align')
     angle = fa.align(image, image, rects_original[0])
-    print('after align')
+    # print('after align')
     return -angle
 
 #

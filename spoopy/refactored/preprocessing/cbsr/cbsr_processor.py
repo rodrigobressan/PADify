@@ -34,7 +34,7 @@ class CbsrProcessor(Preprocessor):
         be the frames in the following order:
 
         """
-        for frame_name, prop, label, subset in self.handler.get_frames_aligned(self.aligned_root):
+        for frame_name, prop, label, subset in self.handler.get_frames_properties(self.aligned_root):
 
             # with ProcessPoolExecutor() as exec:
             original_path = join(self.aligned_root, subset, label, prop, frame_name)
@@ -59,9 +59,6 @@ class CbsrProcessor(Preprocessor):
     def copy_if_not_exists(self, original_path: str, output_path: str, file_name: str):
         if not exists(join(output_path, file_name)):
             file_utils.file_helper.copy_file(original_path, output_path)
-            print('copied %s' % file_name)
-        else:
-            print('%s already moved pai' % file_name)
 
     def get_index_from_name(self, frame_name: str) -> str:
         frame_name = frame_name.split('_frame_')[0]

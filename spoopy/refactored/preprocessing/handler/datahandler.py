@@ -31,7 +31,7 @@ class DataHandler(ABC):
         pass
 
     @abstractmethod
-    def get_frames_aligned(self, path: str) -> [str, str, str, str, str]:
+    def get_frames_properties(self, path: str) -> [str, str, str, str]:
         pass
 
     @abstractmethod
@@ -113,7 +113,7 @@ class DiskHandler(DataHandler):
                 for frame in frames_list:
                     yield [frame, label, subset]
 
-    def get_frames_aligned(self, path: str) -> [str, str, str, str]:
+    def get_frames_properties(self, path: str) -> [str, str, str, str]:
         """
         Yields the frame names, along with the properties, labels and subsets
         :param path: the path where we should search
