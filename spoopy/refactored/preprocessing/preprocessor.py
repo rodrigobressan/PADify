@@ -3,12 +3,13 @@ from typing import List
 
 import os
 from abc import ABC, abstractmethod
-from os.path import join
+from os.path import join, exists
 
 from refactored.preprocessing.Video import Video
 from refactored.preprocessing.alignment.aligner import Aligner
 from refactored.preprocessing.handler.datahandler import DataHandler, DiskHandler
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
+from tools import file_utils
 from tools.file_utils.file_helper import split_video_into_frames
 
 
@@ -30,7 +31,8 @@ class Preprocessor(ABC):
                  properties: List[PropertyExtractor],
                  handler: DataHandler = DiskHandler(),
                  attack_label: str = 'attack',
-                 real_label: str = 'real'):
+                 real_label: str = 'real',
+                 all_attacks_alias: str = 'all'):
 
         self.videos_root = join(artifacts_root, self.PATH_ORIGINAL_VIDEOS, dataset_name)
         self.separated_pai_root = join(artifacts_root, self.PATH_SEPARATED_BY_PAI, dataset_name)
@@ -47,6 +49,7 @@ class Preprocessor(ABC):
 
         self.default_attack_label = attack_label
         self.default_real_label = real_label
+        self.all_attacks_alias = all_attacks_alias
 
     @abstractmethod
     def organize_videos_by_subset_and_label(self):
@@ -63,39 +66,24 @@ class Preprocessor(ABC):
         raise NotImplementedError("You should override the method organize_videos_by_subset_and_label")
 
     @abstractmethod
-    def organize_properties_by_pai(self) -> None:
+    def get_person_from_video_name(self, name: str) -> str:
         """
-        This method should be overridden in order to organise the extracted properties maps in the following structure:
-
-            Subset [Test, Train]
-                Attack Alias [Print, Tablet, Mask]
-                    Attack
-                        Frame1.jpg
-                    Real
-                        Frame1.jpg
-
-            E.g.:
-
-            Train
-                Tablet
-                    Attack
-                        Frame1.jpg
-                        Frame2.jpg
-                    Real
-                        Frame1.jpg
-                        Frame2.jpg
-                Mask
-                    Attack
-                        Frame1.jpg
-                        Frame2.jpg
-                    Real
-                        Frame1.jpg
-                        Frame2.jpg
-            Test
-                ... Similar to the above ...
-        :return: None
+        Abstract method used to obtain the person/subject name from a given video. This method is declared as abstract
+        so each custom processor needs to be implemented accordingly to the dataset naming structure.
+        :param name: the name from the video without any parsing
+        :return: a string containing the subject/person name
         """
-        raise NotImplementedError("You should override the method organize_properties_by_pai")
+        raise NotImplementedError("You should override the method get_person_from_video_name")
+
+    @abstractmethod
+    def get_attack_alias_from_frame_name(self, frame_name) -> str:
+        """
+        This method should be overridden in order to return the name of the attack (tablet, print, mask) from a given
+        frame name
+        :param frame_name: the name of the frame
+        :return: a str object with the attack alias
+        """
+        raise NotImplementedError("You should override the method get_attack_alias_from_frame_name")
 
     def move_video_to_proper_dir(self, video: Video) -> None:
         """
@@ -226,16 +214,6 @@ class Preprocessor(ABC):
                     frames_with_issues.append([frame_name, label, subset])
         return frames_with_issues
 
-    @abstractmethod
-    def get_person_from_video_name(self, name: str) -> str:
-        """
-        Abstract method used to obtain the person/subject name from a given video. This method is declared as abstract
-        so each custom processor needs to be implemented accordingly to the dataset naming structure.
-        :param name: the name from the video without any parsing
-        :return: a string containing the subject/person name
-        """
-        raise NotImplementedError("You should override the method get_person_from_video_name")
-
     def remove_properties_frames_with_issues(self, frames_issues: List) -> None:
         """
         Used to remove frames that had some issues during the preprocessing. An example of issue can be a frame which
@@ -259,3 +237,52 @@ class Preprocessor(ABC):
                 except FileNotFoundError as fnf:
                     # When we try to remove the frame that doesn't exist, we will receive a FileNotFound Error
                     print('Tried to remove %s but it doesnt exist' % frame_path)
+
+    def organize_properties_by_pai(self) -> None:
+        """
+        Used to organise the properties by their PAI. The output of this process will
+        be the frames in the following order:
+            Root
+                All (Containing all attacks and all authentics)
+                    Attack
+                        Prop [Depth, Illum]
+                            Frame1.jpg
+                            Frame2.jpg
+                    Real
+                        Prop [Depth, Illum]
+                            Frame1.jpg
+                            Frame2.jpg
+                Attack Alias [Print, Cut, Mask, Tablet]
+                    Attack
+                        Prop [Depth, Illum]
+                            Frame1.jpg
+                            Frame2.jpg
+                    Real
+                        Prop [Depth, Illum]
+                            Frame1.jpg
+                            Frame2.jpg
+
+        """
+        for frame_name, prop, label, subset in self.handler.get_frames_properties(self.aligned_root):
+
+            original_path = join(self.aligned_root, subset, label, prop, frame_name)
+
+            # # move all frames into 'all' folder
+            all_output_path = join(self.separated_pai_root, self.all_attacks_alias, subset, label, prop)
+            self.copy_if_not_exists(original_path, all_output_path, frame_name)
+
+            if label == self.default_attack_label:
+                attack_alias = self.get_attack_alias_from_frame_name(frame_name)
+
+                # format: /root/attack_alias/subset/label/property
+                output_path = join(self.separated_pai_root, attack_alias, subset, label, prop)
+                self.copy_if_not_exists(original_path, output_path, frame_name)
+            else:
+                # make a copy into each of the attack folders
+                for attack_type in self.pai_config.pai_dict:
+                    output_path = join(self.separated_pai_root, attack_type, subset, label, prop)
+                    self.copy_if_not_exists(original_path, output_path, frame_name)
+
+    def copy_if_not_exists(self, original_path: str, output_path: str, file_name: str):
+        if not exists(join(output_path, file_name)):
+            file_utils.file_helper.copy_file(original_path, output_path)

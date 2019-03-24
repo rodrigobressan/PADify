@@ -300,9 +300,9 @@ class TestIntegrationPipeline(unittest.TestCase):
             # self.extract_frames_from_videos,
             # self.extract_maps_from_frames,
             # self.align_maps,
-            # self.separate_maps_by_pai,
+            self.separate_maps_by_pai,
             # self.analyze_extracted_data,
-            self.extract_features,
+            # self.extract_features,
             # self.perform_intra_feature_classification,
             # self.perform_inter_feature_classification
         ]

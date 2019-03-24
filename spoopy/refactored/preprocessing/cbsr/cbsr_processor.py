@@ -1,14 +1,12 @@
-from concurrent.futures import ProcessPoolExecutor
-from typing import List, Tuple
+from typing import List
 
-from os.path import join, exists
+from os.path import join
 
 from refactored.preprocessing.Video import Video
 from refactored.preprocessing.cbsr.cbsr_pai import CbsrPaiConfig
 from refactored.preprocessing.pai.pai import Pai
 from refactored.preprocessing.preprocessor import Preprocessor
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
-from tools import file_utils
 
 
 class CbsrProcessor(Preprocessor):
@@ -28,87 +26,23 @@ class CbsrProcessor(Preprocessor):
                                             dataset_name=dataset_name,
                                             properties=properties)
 
-    def organize_properties_by_pai(self) -> None:
-        """
-        Used to organise the properties by their respectives PAI. The output of this process will
-        be the frames in the following order:
-
-        """
-        for frame_name, prop, label, subset in self.handler.get_frames_properties(self.aligned_root):
-
-            # with ProcessPoolExecutor() as exec:
-            original_path = join(self.aligned_root, subset, label, prop, frame_name)
-
-            # # move all frames into 'all' folder
-            all_output_path = join(self.separated_pai_root, 'all', subset, label, prop)
-            file_utils.file_helper.copy_file(original_path, all_output_path)
-
-            if label == self.default_attack_label:
-                index_frame = self.get_index_from_name(frame_name)
-                attack_alias = self.get_attack_type_from_name(index_frame)
-
-                # format: /root/attack_alias/subset/label/property
-                output_path = join(self.separated_pai_root, attack_alias, subset, label, prop)
-                self.copy_if_not_exists(original_path, output_path, frame_name)
-            else:
-                # make a copy into each of the attack folders
-                for attack_type in self.pai_config.pai_dict:
-                    output_path = join(self.separated_pai_root, attack_type, subset, label, prop)
-                    self.copy_if_not_exists(original_path, output_path, frame_name)
-
-    def copy_if_not_exists(self, original_path: str, output_path: str, file_name: str):
-        if not exists(join(output_path, file_name)):
-            file_utils.file_helper.copy_file(original_path, output_path)
-
-    def get_index_from_name(self, frame_name: str) -> str:
-        frame_name = frame_name.split('_frame_')[0]
-
-        if 'HR' in frame_name:
-            frame_index = '_'.join(frame_name.split('_')[1:3])
-        else:
-            frame_index = frame_name.split('_')[1]
-
-        return frame_index
-
-    def get_output_for_attack(self, frame_name: str, output_path: str, property: str) -> Tuple[str, str]:
-        """
-        Used to return the output path for a given PAI
-        :param frame_name: the name of the frame
-        :param output_path: where it will be saved
-        :param property: the property we're working with
-        :return: a Tuple containing both the name of the frame and where it should be stored
-        """
-        frame_index = self.get_index_from_name(frame_name)
-
-        # retrieve the attack type
-        attack_type = self.get_attack_type_from_name(frame_index)
-
-        # <root>/<subset>/<label_atk>/<type_atk>/<prop>/<frame> e.g.: /data/train/attack/mask/depth/frameN.jpg
-        output_path = join(output_path, self.default_attack_label, attack_type, property)
-        return frame_name, output_path
-
-    def get_attack_type_from_name(self, name: str) -> str:
-        """
-        Used to get the PAI alias from the file name
-        :param name: the name of the file
-        :return: the PAI alias
-        """
-        video_without_ext = self.remove_video_extension(name)
-        pai_alias = self.pai_config.get_pai_alias(video_without_ext)
-        return pai_alias
+    """
+    Overridden methods
+    """
 
     def organize_videos_by_subset_and_label(self):
         """
-       Organize files in the following order:
+        Overridden method from Preprocessor class
+        Organize files in the following order:
 
-       Dataset name (Cbsr, RA)
-           PAI Type (Print, tablet, All)
-               Set (Train, Test)
-                   Label (Real, Fake)
-                   ====
-                       Frames (.png, .jpg)
-                       Features (.npy)
-                       Models (.sav)
+        Dataset name (Cbsr, RA)
+            PAI Type (Print, tablet, All)
+                Set (Train, Test)
+                    Label (Real, Fake)
+                    ====
+                        Frames (.png, .jpg)
+                        Features (.npy)
+                        Models (.sav)
        """
 
         subset_list = self.handler.list_files(self.videos_root)  # List all subsets (train, test)
@@ -125,14 +59,55 @@ class CbsrProcessor(Preprocessor):
                 for video_name in video_list:
                     self.process_video(persons_path, person, subset, video_name)
 
+    def get_attack_alias_from_frame_name(self, frame_name) -> str:
+        """"
+        Overridden method from Preprocessor class.
+        Used to get the attack alias from a given frame name.
+        :param frame_name: the name of the frame currently being looked
+        :return: the attack alias (print, tablet, mask) from that given frame name
+        """
+        index = self._get_index_from_name(frame_name)
+        attack_alias = self._get_attack_type_from_frame(index)
+        return attack_alias
+
     def get_person_from_video_name(self, name: str) -> str:
         """
+        Overriden method from PreProcessor class
         Used to get the person ID from a given video name
         :param name: the name of the file
         :return: the subject/person ID
         """
         # Format: PERSON_VIDEONAME.ext
         return name.split('_')[0]
+
+    """
+    Helper methods
+    """
+
+    def _get_index_from_name(self, frame_name: str) -> str:
+        """
+        Used to parse the video index from the frame name.
+        :param frame_name: The complete frame name
+        :return: the index from the frame
+        """
+        frame_name = frame_name.split('_frame_')[0]
+
+        if 'HR' in frame_name:
+            frame_index = '_'.join(frame_name.split('_')[1:3])
+        else:
+            frame_index = frame_name.split('_')[1]
+
+        return frame_index
+
+    def _get_attack_type_from_frame(self, name: str) -> str:
+        """
+        Used to get the PAI alias from the file name
+        :param name: the name of the file
+        :return: the PAI alias
+        """
+        video_without_ext = self.remove_video_extension(name)
+        pai_alias = self.pai_config.get_pai_alias(video_without_ext)
+        return pai_alias
 
     def remove_video_extension(self, video_name: str) -> str:
         """
