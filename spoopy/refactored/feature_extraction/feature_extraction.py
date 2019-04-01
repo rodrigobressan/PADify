@@ -159,6 +159,11 @@ class FeatureExtractor:
         datasets = os.listdir(self.separated_root)
         for dataset in datasets:
             dataset_path = join(self.separated_root, dataset)
+
+            if os.path.exists(join(self.output_features, dataset)):
+                print('%s already extracted features' % dataset)
+                continue
+
             attacks_list = os.listdir(dataset_path)
 
             for attack in attacks_list:

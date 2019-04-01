@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from sklearn.ensemble import BaggingClassifier
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
+from xgboost import XGBClassifier
 
 
 class BaseClassifier(ABC):
@@ -28,7 +29,7 @@ class BaseClassifier(ABC):
 
 class SvcClassifier(BaseClassifier):
     def __init__(self):
-        classifier = OneVsRestClassifier(BaggingClassifier(SVC(verbose=False), n_jobs=-1))
+        classifier = OneVsRestClassifier(BaggingClassifier(SVC(verbose=True), n_jobs=-1))
         super().__init__(classifier)
 
     def predict_proba(self, X):
@@ -36,3 +37,29 @@ class SvcClassifier(BaseClassifier):
 
     def get_alias(self):
         return "svc"
+
+
+
+class XGBoostClassifier(BaseClassifier):
+    def __init__(self):
+        classifier = XGBClassifier()
+        super().__init__(classifier)
+
+    def predict_proba(self, X):
+        return self.classifier.predict_proba(X)
+
+    def get_alias(self):
+        return "xgb"
+#
+#
+# class XGBoostClassifier(BaseClassifier):
+#     def __int__(self):
+#         classifier = OneVsRestClassifier(BaggingClassifier(SVC(verbose=True), n_jobs=-1))
+#         # classifier = XGBClassifier()
+#         super().__init__(classifier)
+#
+#     def predict_proba(self, X):
+#         return self.classifier.predict_proba(X)
+#
+#     def get_alias(self):
+#         return "xgb"

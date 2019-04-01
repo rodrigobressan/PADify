@@ -3,9 +3,9 @@ from typing import List
 from os.path import join
 
 from refactored.preprocessing.Video import Video
-from refactored.preprocessing.cbsr.cbsr_pai import CbsrPaiConfig
 from refactored.preprocessing.pai.pai import Pai
 from refactored.preprocessing.preprocessor import Preprocessor
+from refactored.preprocessing.processor.cbsr.cbsr_pai import CbsrPaiConfig
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
 
 

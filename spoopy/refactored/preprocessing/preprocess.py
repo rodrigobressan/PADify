@@ -1,4 +1,5 @@
-from refactored.preprocessing.cbsr.cbsr_processor import CbsrProcessor
+from refactored.preprocessing.processor.cbsr.cbsr_processor import CbsrProcessor
+from refactored.preprocessing.processor.replay_attack.ra_processor import RaProcessor
 from refactored.preprocessing.property.depth_extractor import DepthExtractor
 from refactored.preprocessing.property.illumination_extractor import IlluminationExtractor
 from refactored.preprocessing.property.original_extractor import OriginalExtractor
@@ -27,3 +28,9 @@ def make_cbsr_processor(artifacts_root):
                               properties=get_properties())
     return processor
 
+
+def make_ra_processor(artifacts_root):
+    processor = RaProcessor(artifacts_root=artifacts_root,
+                            dataset_name='ra',
+                            properties=get_properties())
+    return processor

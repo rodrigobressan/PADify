@@ -1,3 +1,5 @@
+from concurrent.futures import ProcessPoolExecutor
+
 import numpy as np
 import os
 from os.path import join
@@ -34,6 +36,7 @@ class IntraFeatureClassifier(FeatureClassifier):
                                 classifier: BaseClassifier,
                                 model: BaseModel,
                                 prop: PropertyExtractor):
+
         path_features = join(self.features_root_path, dataset, self.target_all, prop.get_property_alias(),
                              model.get_alias())
 
@@ -43,8 +46,16 @@ class IntraFeatureClassifier(FeatureClassifier):
                                   model.get_alias(),
                                   classifier.get_alias())
 
+        print('features: ', path_features)
+        print('output: ', output_dir)
+
+        if os.path.exists(output_dir):
+            print('Already processed, skipping.')
+            return
+
         X_train, y_train, X_test, y_test, names_test = self._load_features_and_targets(path_features)
 
         y_pred, y_pred_proba = self._classify(classifier, X_train, y_train, X_test)
         results = self._evaluate_results(y_pred, y_test, names_test)
+        print('results:', results)
         self._save_artifacts(classifier, output_dir, y_pred, y_pred_proba, results)

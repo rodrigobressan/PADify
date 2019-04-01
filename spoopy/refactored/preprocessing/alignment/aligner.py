@@ -43,16 +43,16 @@ class Aligner():
     def align_single_frame(self, base_maps_frames, frame_name, output_base, properties):
 
         # verify if it's not already processed
-        is_missing_align = False
+        properties_missing = []
         for property in properties:
             dir_frame_aligned = os.path.join(output_base, property.get_property_alias())
             path_frame_aligned = os.path.join(dir_frame_aligned, frame_name)
 
             if not os.path.exists(path_frame_aligned):
+                properties_missing.append(property)
                 # print('missing align for %s: ' % path_frame_aligned)
-                is_missing_align = True
 
-        if is_missing_align:
+        if len(properties_missing) > 0:
             # print('Aligning %s' % frame_name)
             full_path_frame = os.path.join(base_maps_frames, 'original', frame_name)
             face_angle = face_aligner.align_faces.get_face_angle(full_path_frame, self.detector, self.face_aligner)
@@ -61,7 +61,7 @@ class Aligner():
             face_cropper = face_detector.FaceCropper()
             face_coordinates = face_cropper.get_faces_coordinates(image_fixed_angle)
             cropper = ImageCropper(face_cropper, face_coordinates)
-            for property in properties:
+            for property in properties_missing:
 
                     try:
                         dir_frame_unaligned = os.path.join(base_maps_frames, property.get_property_alias())
@@ -83,10 +83,10 @@ class Aligner():
                         print('Error when trying to align frame ', e)
 
         # else:
-            # print('skipping.. %s ' % frame_name)
+        #     print('Frame %s already processed all' % frame_name)
 
     def align_frame(self, aligner, cropper, path_frame_aligned):
         aligned_img = aligner.align()
         cropper.crop(aligned_img, path_frame_aligned)
-        print('align done with sucess for %s' % path_frame_aligned)
+        # print('align done with sucess for %s' % path_frame_aligned)
 
