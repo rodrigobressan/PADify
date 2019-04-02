@@ -6,11 +6,14 @@ import os
 import shutil
 from os.path import exists, join
 
+from refactored.classification.feature.inter_classifier import InterBasePredictor
+from refactored.classification.metalearner.metalearner_classifier import MetalearnerClassifier
+
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
-from refactored.classification.classifier import SvcClassifier, XGBoostClassifier
-from refactored.classification.feature.intra_classifier import IntraFeatureClassifier
+from refactored.classification.classifier import XGBoostClassifier
+from refactored.classification.feature.intra_classifier import IntraBasePredictor
 from refactored.feature_extraction.feature_extraction import FeatureExtractor
 from refactored.feature_extraction.model import ResNet50Model
 from refactored.preprocessing import preprocess
@@ -225,14 +228,32 @@ class TestPreprocessingCbsr(unittest.TestCase):
         return frames_maps
 
     def perform_intra_feature_classification(self):
-        feature_classifier = IntraFeatureClassifier(features_root_path=self.output_features,
-                                                    base_output_path=self.output_classification,
-                                                    classifiers=self.classifiers,
-                                                    properties=self.processor.properties,
-                                                    models=self.models)
+        feature_classifier = IntraBasePredictor(features_root_path=self.output_features,
+                                                base_output_path=self.output_classification,
+                                                classifiers=self.classifiers,
+                                                properties=self.processor.properties,
+                                                models=self.models)
 
         feature_classifier.classify_intra_dataset()
-        # self.evaluate_intra_classification(feature_classifier)
+
+    def perform_inter_feature_classification(self):
+        feature_classifier = InterBasePredictor(features_root_path=self.output_features,
+                                                base_output_path=self.output_classification,
+                                                classifiers=self.classifiers,
+                                                properties=self.processor.properties,
+                                                models=self.models)
+
+        feature_classifier.classify_inter_dataset()
+
+
+    def perform_metalearning_classification(self):
+        metalearner_classifier = MetalearnerClassifier(features_root_path=self.output_features,
+                                                        base_output_path=self.output_classification,
+                                                        classifiers=self.classifiers,
+                                                        properties=self.processor.properties,
+                                                        models=self.models)
+
+        metalearner_classifier._perform_meta_classification()
 
     def test_preprocessor(self):
         tasks = [
@@ -243,8 +264,9 @@ class TestPreprocessingCbsr(unittest.TestCase):
             # self.separate_maps_by_pai,
             # self.analyze_extracted_data,
             # self.extract_features,
-            self.perform_intra_feature_classification,
+            # self.perform_intra_feature_classification,
             # self.perform_inter_feature_classification
+            self.perform_metalearning_classification
         ]
 
         for task in tasks:

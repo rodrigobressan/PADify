@@ -4,6 +4,21 @@ import numpy as np
 import os
 
 
+def load_features(path: str, subset: str) -> np.ndarray:
+    """
+    Used to load a given set of features from a specified subset
+    :param path: the path where the features are located
+    :param subset: their subset (train or test)
+    :return: a np.ndarray containing the features
+    """
+    if subset == 'train':
+        file_name = 'X_train.npy'
+    elif subset == 'test':
+        file_name = 'X_test.npy'
+
+    return np.load(os.path.join(path, file_name))
+
+
 def concatenate_features(path: str):
     train_features_path = os.path.join(path, 'X_train.npy')
     test_features_path = os.path.join(path, 'X_test.npy')

@@ -39,7 +39,6 @@ class SvcClassifier(BaseClassifier):
         return "svc"
 
 
-
 class XGBoostClassifier(BaseClassifier):
     def __init__(self):
         classifier = XGBClassifier()
@@ -50,6 +49,7 @@ class XGBoostClassifier(BaseClassifier):
 
     def get_alias(self):
         return "xgb"
+
 #
 #
 # class XGBoostClassifier(BaseClassifier):

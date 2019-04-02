@@ -13,7 +13,7 @@ from tools.classifier import evaluate_hter
 from tools.file_utils import file_helper
 
 
-class FeatureClassifier:
+class BasePredictor:
     PRED_NAME = "y_pred.npy"
     PROBA_NAME = "y_pred_proba.npy"
     MODEL_NAME = "model.sav"
@@ -21,7 +21,7 @@ class FeatureClassifier:
 
     INTRA_NAME = "intra"
     INTER_NAME = "inter"
-    SELF_NAME = "self"
+    META_NAME = "meta"
 
     def __init__(self,
                  features_root_path: str,
@@ -46,7 +46,7 @@ class FeatureClassifier:
 
         self.intra_dataset_output = os.path.join(self.base_output_path, self.INTRA_NAME)
         self.inter_dataset_output = os.path.join(self.base_output_path, self.INTER_NAME)
-        self.self_dataset_output = os.path.join(self.base_output_path, self.SELF_NAME)
+        self.meta_dataset_output = os.path.join(self.base_output_path, self.META_NAME)
 
     def _list_variations(self):
         # classifiers = [svc, svm, etc]
@@ -62,8 +62,8 @@ class FeatureClassifier:
     def _save_artifacts(self, classifier: BaseClassifier,
                         output_dir: str,
                         y_pred: np.ndarray,
-                        y_pred_proba,
-                        results):
+                        y_pred_proba: np.ndarray,
+                        results: np.ndarray):
 
         file_helper.guarantee_path_preconditions(output_dir)
 

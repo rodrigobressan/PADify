@@ -5,14 +5,14 @@ import os
 from os.path import join
 
 from refactored.classification.classifier import BaseClassifier
-from refactored.classification.feature.feature_classifier import FeatureClassifier
+from refactored.classification.feature.feature_classifier import BasePredictor
 from refactored.feature_extraction.feature_extraction import NAME_FEATURES, NAME_TARGETS, NAME_SAMPLES
 from refactored.feature_extraction.model import BaseModel
 from refactored.io_utils import load_txt
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
 
 
-class IntraFeatureClassifier(FeatureClassifier):
+class IntraBasePredictor(BasePredictor):
     def classify_intra_dataset(self):
         datasets = os.listdir(self.features_root_path)
         for dataset in datasets:

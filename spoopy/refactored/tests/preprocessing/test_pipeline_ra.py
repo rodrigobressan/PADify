@@ -9,9 +9,9 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 from refactored.classification.classifier import SvcClassifier
-from refactored.classification.feature.feature_classifier import FeatureClassifier
-from refactored.classification.feature.inter_classifier import InterFeatureClassifier
-from refactored.classification.feature.intra_classifier import IntraFeatureClassifier
+from refactored.classification.feature.feature_classifier import BasePredictor
+from refactored.classification.feature.inter_classifier import InterBasePredictor
+from refactored.classification.feature.intra_classifier import IntraBasePredictor
 from refactored.feature_extraction.feature_extraction import FeatureExtractor
 from refactored.feature_extraction.model import ResNet50Model
 from refactored.preprocessing import preprocess
@@ -131,26 +131,26 @@ class TestIntegrationPipeline(unittest.TestCase):
                         self.assertTrue(exists(path_artifact))
 
     def perform_intra_feature_classification(self):
-        feature_classifier = IntraFeatureClassifier(features_root_path=self.output_features,
-                                                    base_output_path=self.output_classification,
-                                                    classifiers=self.classifiers,
-                                                    properties=self.processor.properties,
-                                                    models=self.models)
+        feature_classifier = IntraBasePredictor(features_root_path=self.output_features,
+                                                base_output_path=self.output_classification,
+                                                classifiers=self.classifiers,
+                                                properties=self.processor.properties,
+                                                models=self.models)
 
         feature_classifier.classify_intra_dataset()
         self.evaluate_intra_classification(feature_classifier)
 
     def perform_inter_feature_classification(self):
-        feature_classifier = InterFeatureClassifier(features_root_path=self.output_features,
-                                                    base_output_path=self.output_classification,
-                                                    classifiers=self.classifiers,
-                                                    properties=self.processor.properties,
-                                                    models=self.models)
+        feature_classifier = InterBasePredictor(features_root_path=self.output_features,
+                                                base_output_path=self.output_classification,
+                                                classifiers=self.classifiers,
+                                                properties=self.processor.properties,
+                                                models=self.models)
 
         feature_classifier.classify_inter_dataset()
         # self.evaluate_intra_classification(feature_classifier)
 
-    def evaluate_intra_classification(self, feature_classifier: FeatureClassifier):
+    def evaluate_intra_classification(self, feature_classifier: BasePredictor):
         datasets = os.listdir(join(self.output_classification, feature_classifier.INTRA_NAME))
 
         expected_artifacts = ['model.sav',
@@ -173,7 +173,7 @@ class TestIntegrationPipeline(unittest.TestCase):
                             path_artifact = os.path.join(base_path, artifact)
                             self.assertTrue(exists(path_artifact))
 
-    def evaluate_inter_classification(self, feature_classifier: FeatureClassifier):
+    def evaluate_inter_classification(self, feature_classifier: BasePredictor):
         datasets = os.listdir(join(self.output_classification, feature_classifier.INTER_NAME))
 
         expected_artifacts = ['model.sav',
@@ -291,7 +291,7 @@ class TestIntegrationPipeline(unittest.TestCase):
             # self.align_maps,
             # self.separate_maps_by_pai,
             # self.analyze_extracted_data,
-            self.extract_features,
+            # self.extract_features,
             # self.perform_intra_feature_classification,
             # self.perform_inter_feature_classification
         ]

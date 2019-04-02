@@ -3,12 +3,12 @@ from os.path import join
 
 from refactored.classification import features_utils
 from refactored.classification.classifier import BaseClassifier
-from refactored.classification.feature.feature_classifier import FeatureClassifier
+from refactored.classification.feature.feature_classifier import BasePredictor
 from refactored.feature_extraction.model import BaseModel
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
 
 
-class InterFeatureClassifier(FeatureClassifier):
+class InterBasePredictor(BasePredictor):
     def classify_inter_dataset(self):
         for origin, target, model, prop, classifier in self._list_inter_combinations(self.features_root_path):
             self._classify_inter_dataset(dataset_origin=origin,
