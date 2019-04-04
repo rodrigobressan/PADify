@@ -81,10 +81,24 @@ class BasePredictor:
 
         save_txt(results_path, result)
 
-    def _classify(self, classifier: BaseClassifier,
-                  X_train: np.ndarray,
-                  y_train: np.ndarray,
-                  X_test: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _fit(self, classifier: BaseClassifier,
+             X_train: np.ndarray,
+             y_train: np.ndarray) -> BaseClassifier:
+        X_train = np.reshape(X_train, (X_train.shape[0], -1))
+
+        classifier.fit(X_train, y_train)
+        return classifier
+
+    def _predict(self, classifier: BaseClassifier,
+                 X_train: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        y_pred = classifier.predict(X_train)
+        y_pred_proba = classifier.predict_proba(X_train)
+        return y_pred, y_pred_proba
+
+    def _fit_and_predict(self, classifier: BaseClassifier,
+                         X_train: np.ndarray,
+                         y_train: np.ndarray,
+                         X_test: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         X_train = np.reshape(X_train, (X_train.shape[0], -1))
         X_test = np.reshape(X_test, (X_test.shape[0], -1))
 

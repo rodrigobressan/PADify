@@ -47,7 +47,7 @@ class InterBasePredictor(BasePredictor):
         names_train = features_utils.concatenate_names(origin_path)
         names_test = features_utils.concatenate_names(target_path)
 
-        y_pred, y_proba = self._classify(classifier, X_train, y_train, X_test)
+        y_pred, y_proba = self._fit_and_predict(classifier, X_train, y_train, X_test)
         results = self._evaluate_results(y_pred, y_test, names_test)
 
         print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))

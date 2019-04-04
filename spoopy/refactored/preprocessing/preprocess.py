@@ -34,3 +34,10 @@ def make_ra_processor(artifacts_root):
                             dataset_name='ra',
                             properties=get_properties())
     return processor
+
+
+def make_deep_fakes_processor(artifacts_root):
+    processor = DeepFakesProcessor(artifacts_root=artifacts_root,
+                            dataset_name='deep_fakes',
+                            properties=get_properties())
+    return processor

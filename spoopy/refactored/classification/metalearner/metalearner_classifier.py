@@ -1,3 +1,5 @@
+import pickle
+
 import numpy as np
 import os
 from os.path import join, exists
@@ -6,7 +8,8 @@ from refactored.classification import features_utils
 from refactored.classification.classifier import BaseClassifier
 from refactored.classification.feature.feature_classifier import BasePredictor
 from refactored.feature_extraction.model import BaseModel
-from refactored.preprocessing.property.property_extractor import PropertyExtractor
+from refactored.io_utils import save_txt
+from tools.file_utils import file_helper
 
 
 class MetalearnerClassifier(BasePredictor):
@@ -34,26 +37,38 @@ class MetalearnerClassifier(BasePredictor):
         STEP 1.2
         Used to train the second classifier (probas classifier) and output the final results
         """
-        probas_path = os.path.join(self.meta_dataset_output, self.INTER_NAME)
+        probas_path = os.path.join(self.meta_dataset_output, self.INTER_NAME, "features")
         # [CBSR, RA, NUAA]
         for dataset in os.listdir(probas_path):
             # path_dataset = os.path.join(self.features_root_path, dataset, self.target_all)
 
-            for classsifier in self.classifiers:
+            for classifier in self.classifiers:
 
                 # [ResNet, VGG...]
                 for model in self.models:
                     # TODO change to iterate properties
 
-                    probas_original = self.__load_probas(dataset, "original", model, classsifier)
-                    probas_depth = self.__load_probas(dataset, "depth", model, classsifier)
-                    probas_illumination = self.__load_probas(dataset, "illumination", model, classsifier)
-                    probas_saliency = self.__load_probas(dataset, "saliency", model, classsifier)
+                    probas_original = self.__load_probas(dataset, "original", model, classifier)
+                    probas_depth = self.__load_probas(dataset, "depth", model, classifier)
+                    probas_illumination = self.__load_probas(dataset, "illumination", model, classifier)
+                    probas_saliency = self.__load_probas(dataset, "saliency", model, classifier)
 
                     stacked_probas = np.stack((probas_depth, probas_illumination, probas_saliency, probas_original),
-                                              axis=0)
+                                              axis=2)
 
-                    self._classify(classsifier, stacked_probas, )
+                    labels_original = self.__load_labels(dataset, "original", model, classifier)
+                    fitted_classifier = self._fit(classifier, stacked_probas, labels_original)
+
+                    output_dir = join(self.meta_dataset_output,
+                                      self.INTER_NAME,
+                                      "probas",
+                                      dataset,
+                                      model.get_alias(),
+                                      classifier.get_alias())
+
+                    file_helper.guarantee_path_preconditions(output_dir)
+                    model_path = os.path.join(output_dir, self.MODEL_NAME)
+                    pickle.dump(fitted_classifier, open(model_path, 'wb'))
                     print('stacked done!')
 
     def __load_probas(self, dataset_name: str, property_alias: str, model: BaseModel,
@@ -66,15 +81,22 @@ class MetalearnerClassifier(BasePredictor):
         :param classifier: used classifier (SVC, XGB, SVM, CNN, etc)
         :return:
         """
-        path_probas = join(self.meta_dataset_output, self.INTER_NAME, dataset_name, property_alias, model.get_alias(),
+        path_probas = join(self.meta_dataset_output, self.INTER_NAME, "features", dataset_name, property_alias,
+                           model.get_alias(),
                            classifier.get_alias(), 'y_pred_proba.npy')
 
-        return np.load(path_probas)
+        probas = np.load(path_probas)
+        probas = np.reshape(probas[:, 0], (probas.shape[0], -1))
+        return probas
 
     def __load_labels(self, dataset_name: str, property_alias: str, model: BaseModel,
                       classifier: BaseClassifier) -> np.ndarray:
 
-        pass
+        path_labels = join(self.meta_dataset_output, self.INTER_NAME, "features", dataset_name, property_alias,
+                           model.get_alias(),
+                           classifier.get_alias(), 'labels.npy')
+
+        return np.load(path_labels)
 
     def _train_inter_feature_classifier(self) -> None:
         """
@@ -97,6 +119,7 @@ class MetalearnerClassifier(BasePredictor):
                     for classifier in self.classifiers:
                         output_dir = join(self.meta_dataset_output,
                                           self.INTER_NAME,
+                                          "features",
                                           dataset,
                                           prop.get_property_alias(),
                                           model.get_alias(),
@@ -104,21 +127,74 @@ class MetalearnerClassifier(BasePredictor):
 
                         if exists(output_dir):
                             print('Already generated, skipping.')
-                            # continue
+                            continue
 
-                        y_pred, y_proba = self._classify(classifier, features_concatenated, labels_concatenated,
-                                                         features_concatenated)
+                        y_pred, y_proba = self._fit_and_predict(classifier, features_concatenated, labels_concatenated,
+                                                                features_concatenated)
                         results = self._evaluate_results(y_pred, labels_concatenated, names_concatenated)
 
                         print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
 
                         self._save_artifacts(classifier, output_dir, y_pred, y_proba, results)
-                        np.save(join(output_dir, 'names.npy'), names_concatenated)
+
+                        save_txt(join(output_dir, 'names.txt'), names_concatenated)
                         np.save(join(output_dir, 'labels.npy'), labels_concatenated)
 
+    def _test_inter_features_classifier(self) -> None:
+        """
+        STEP 2.1
+        Used to predict on the test set with the already trained first classifier
+        """
+
+        for dataset_origin in os.listdir(self.features_root_path):
+            for dataset_target in os.listdir(self.features_root_path):
+
+                if dataset_origin == dataset_target:
+                    print('Origin and target are the same. Skipping.')
+                    continue
+
+                # [ResNet, VGG]
+                for model in self.models:
+                    base_path_target = join(self.features_root_path, dataset_target, self.target_all)
+
+                    for prop in self.properties:
+
+                        for classifier in self.classifiers:
+                            print('origin %s target %s model %s prop %s classifier %s' % (dataset_origin,
+                                                                                          dataset_target,
+                                                                                          model.get_alias(),
+                                                                                          prop.get_property_alias(),
+                                                                                          classifier.get_alias()))
+                            classifier_path = join(self.meta_dataset_output, self.INTER_NAME, "features",
+                                                   dataset_origin, prop.get_property_alias(),
+                                                   model.get_alias(), classifier.get_alias(), 'model.sav')
+
+                            with open(classifier_path, 'rb') as f:
+                                model_fitted = pickle.load(f)
+
+                            path_features = join(base_path_target, prop.get_property_alias(), model.get_alias())
+
+                            features_concatenated = features_utils.concatenate_features(path_features)
+                            names_concatenated = features_utils.concatenate_names(path_features)
+                            labels_concatenated = features_utils.concatenate_labels(path_features)
+
+                            y_pred, y_pred_proba = self._predict(model_fitted, features_concatenated)
+
+                            results = self._evaluate_results(y_pred, labels_concatenated, names_concatenated)
+                            print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
+                            #
+                            # output_dir = join(self.meta_dataset_output,
+                            #                   self.INTER_NAME,
+                            #                   )
+                            # self._save_artifacts(classifier, output_dir, y_pred, y_pred_proba, results)
+                            # #
+                            # save_txt(join(output_dir, 'names.txt'), names_concatenated)
+                            # np.save(join(output_dir, 'labels.npy'), labels_concatenated)
+
     def _perform_meta_classification(self):
-        self._train_inter_feature_classifier()
+        # self._train_inter_feature_classifier()
         # self._train_inter_probas_classifier()
+        self._test_inter_features_classifier()
 
     def classify_all_probas(self):
         for origin, target, model, prop, classifier in self._list_datasets(self.features_root_path):
@@ -134,39 +210,39 @@ class MetalearnerClassifier(BasePredictor):
             for model, prop, classifier in self._list_variations():
                 yield [dataset_origin, model, prop, classifier]
 
-    def _classify_probas(self,
-                         dataset_origin: str,
-                         dataset_target: str,
-                         classifier: BaseClassifier,
-                         model: BaseModel,
-                         prop: PropertyExtractor):
-
-        origin_path = join(self.features_root_path, dataset_origin, self.target_all, prop.get_property_alias(),
-                           model.get_alias())
-
-        target_path = join(self.features_root_path, dataset_target, self.target_all, prop.get_property_alias(),
-                           model.get_alias())
-
-        X_train = features_utils.concatenate_features(origin_path)
-        X_test = features_utils.concatenate_features(target_path)
-
-        y_train = features_utils.concatenate_labels(origin_path)
-        y_test = features_utils.concatenate_labels(target_path)
-
-        names_train = features_utils.concatenate_names(origin_path)
-        names_test = features_utils.concatenate_names(target_path)
-
-        y_pred, y_proba = self._classify(classifier, X_train, y_train, X_test)
-        results = self._evaluate_results(y_pred, y_test, names_test)
-
-        print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
-
-        output_dir = join(self.inter_dataset_output,
-                          dataset_origin,
-                          dataset_target,
-                          self.target_all,
-                          prop.get_property_alias(),
-                          model.get_alias(),
-                          classifier.get_alias())
-
-        self._save_artifacts(classifier, output_dir, y_pred, y_proba, results)
+                # def _classify_probas(self,
+                #                      dataset_origin: str,
+                #                      dataset_target: str,
+                #                      classifier: BaseClassifier,
+                #                      model: BaseModel,
+                #                      prop: PropertyExtractor):
+                #
+                #     origin_path = join(self.features_root_path, dataset_origin, self.target_all, prop.get_property_alias(),
+                #                        model.get_alias())
+                #
+                #     target_path = join(self.features_root_path, dataset_target, self.target_all, prop.get_property_alias(),
+                #                        model.get_alias())
+                #
+                #     X_train = features_utils.concatenate_features(origin_path)
+                #     X_test = features_utils.concatenate_features(target_path)
+                #
+                #     y_train = features_utils.concatenate_labels(origin_path)
+                #     y_test = features_utils.concatenate_labels(target_path)
+                #
+                #     names_train = features_utils.concatenate_names(origin_path)
+                #     names_test = features_utils.concatenate_names(target_path)
+                #
+                #     y_pred, y_proba = self._classify(classifier, X_train, y_train, X_test)
+                #     results = self._evaluate_results(y_pred, y_test, names_test)
+                #
+                #     print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
+                #
+                #     output_dir = join(self.inter_dataset_output,
+                #                       dataset_origin,
+                #                       dataset_target,
+                #                       self.target_all,
+                #                       prop.get_property_alias(),
+                #                       model.get_alias(),
+                #                       classifier.get_alias())
+                #
+                #     self._save_artifacts(classifier, output_dir, y_pred, y_proba, results)

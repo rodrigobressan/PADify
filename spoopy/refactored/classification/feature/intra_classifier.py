@@ -55,7 +55,7 @@ class IntraBasePredictor(BasePredictor):
 
         X_train, y_train, X_test, y_test, names_test = self._load_features_and_targets(path_features)
 
-        y_pred, y_pred_proba = self._classify(classifier, X_train, y_train, X_test)
+        y_pred, y_pred_proba = self._fit_and_predict(classifier, X_train, y_train, X_test)
         results = self._evaluate_results(y_pred, y_test, names_test)
         print('results:', results)
         self._save_artifacts(classifier, output_dir, y_pred, y_pred_proba, results)
