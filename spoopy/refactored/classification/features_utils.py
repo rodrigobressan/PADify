@@ -94,7 +94,8 @@ def concatenate_features_labels_names(path: str):
 
 
 def get_file_names(names_path):
-    file = open(os.path.join(names_path), "r")
-    lines = file.readlines()
+    with open(os.path.join(names_path), "r") as file:
+        lines = file.readlines()
+
     names = json.loads(lines[0])
     return names

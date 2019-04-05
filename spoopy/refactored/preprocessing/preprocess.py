@@ -1,4 +1,5 @@
 from refactored.preprocessing.processor.cbsr.cbsr_processor import CbsrProcessor
+from refactored.preprocessing.processor.deep_fakes.deep_fakes_processor import DeepFakesProcessor
 from refactored.preprocessing.processor.replay_attack.ra_processor import RaProcessor
 from refactored.preprocessing.property.depth_extractor import DepthExtractor
 from refactored.preprocessing.property.illumination_extractor import IlluminationExtractor
@@ -38,6 +39,6 @@ def make_ra_processor(artifacts_root):
 
 def make_deep_fakes_processor(artifacts_root):
     processor = DeepFakesProcessor(artifacts_root=artifacts_root,
-                            dataset_name='deep_fakes',
+                            dataset_name='deep',
                             properties=get_properties())
     return processor

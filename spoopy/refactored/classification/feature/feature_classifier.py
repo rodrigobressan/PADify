@@ -73,7 +73,8 @@ class BasePredictor:
 
         # save fitted model
         model_path = os.path.join(output_dir, self.MODEL_NAME)
-        pickle.dump(classifier, open(model_path, 'wb'))
+        with open(model_path, 'wb') as f:
+            pickle.dump(classifier, f)
 
         # save HTER, APCER and BPCER
         results_path = os.path.join(output_dir, self.RESULTS_NAME)

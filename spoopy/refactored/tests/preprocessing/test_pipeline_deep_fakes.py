@@ -18,7 +18,7 @@ from refactored.preprocessing import preprocess
 
 
 class TestDeepFakesPipeline(unittest.TestCase):
-    base_path_artifacts = '../artifacts_bkp'
+    base_path_artifacts = '../artifacts_deep'
     output_features = os.path.join(base_path_artifacts, 'features')
     output_classification = os.path.join(base_path_artifacts, 'classification')
 
@@ -37,7 +37,7 @@ class TestDeepFakesPipeline(unittest.TestCase):
     def setUp(self):
         self.models = [ResNet50Model()]
         self.classifiers = [SvcClassifier()]
-        self.processor = preprocess.make_ra_processor(self.base_path_artifacts)
+        self.processor = preprocess.make_deep_fakes_processor(self.base_path_artifacts)
 
 
     def extract_maps_from_frames(self):
