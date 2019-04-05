@@ -38,7 +38,6 @@ Flask==0.12.2
 Flask-Cors==3.0.3
 gast==0.2.0
 gevent==1.2.2
-gmpy2==2.0.8
 greenlet==0.4.12
 grpcio==1.11.0
 h5py==2.7.1
