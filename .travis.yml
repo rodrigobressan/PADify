@@ -7,6 +7,7 @@ cache: pip
 before_install:
 - sudo apt-get update
 install:
+- pip install --upgrade pip
 - pip install --progress-bar off -r requirements.txt
 - pip install pytest pytest-cov
 - pip install codecov
