@@ -7,7 +7,7 @@ cache: pip
 before_install:
 - sudo apt-get update
 install:
-- pip install -r requirements.txt --progress-bar off
+- pip install --progress-bar off -r requirements.txt
 - pip install pytest pytest-cov
 - pip install codecov
 - pip install mypy
