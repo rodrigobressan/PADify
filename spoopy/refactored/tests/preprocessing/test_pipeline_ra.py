@@ -14,7 +14,7 @@ from refactored.classification.feature.inter_classifier import InterBasePredicto
 from refactored.classification.feature.intra_classifier import IntraBasePredictor
 from refactored.feature_extraction.feature_extraction import FeatureExtractor
 from refactored.feature_extraction.model import ResNet50Model
-from refactored.preprocessing import preprocess
+from refactored.preprocessing import common_preprocessing
 
 
 class TestIntegrationPipeline(unittest.TestCase):
@@ -37,7 +37,7 @@ class TestIntegrationPipeline(unittest.TestCase):
     def setUp(self):
         self.models = [ResNet50Model()]
         self.classifiers = [SvcClassifier()]
-        self.processor = preprocess.make_ra_processor(self.base_path_artifacts)
+        self.processor = common_preprocessing.make_ra_processor(self.base_path_artifacts)
 
     def organize_videos_by_subset_and_label(self):
         self.processor.organize_videos_by_subset_and_label()

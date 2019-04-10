@@ -5,7 +5,7 @@ from os.path import join
 from refactored.preprocessing.Video import Video
 from refactored.preprocessing.pai.pai import Pai
 from refactored.preprocessing.preprocessor import Preprocessor
-from refactored.preprocessing.processor.replay_attack.ra_pai import RaPaiConfig
+from refactored.preprocessing.processor.replay_attack.ra_pai import DefaultPaiConfig
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
 
 
@@ -17,7 +17,7 @@ class DeepFakesProcessor(Preprocessor):
     def __init__(self, artifacts_root: str,
                  dataset_name: str,
                  properties: List[PropertyExtractor]):
-        self.pai_config = RaPaiConfig()
+        self.pai_config = DefaultPaiConfig()
 
         super(DeepFakesProcessor, self).__init__(artifacts_root=artifacts_root,
                                           dataset_name=dataset_name,

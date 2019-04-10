@@ -15,8 +15,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 from refactored.classification.classifier import XGBoostClassifier
 from refactored.classification.feature.intra_classifier import IntraBasePredictor
 from refactored.feature_extraction.feature_extraction import FeatureExtractor
-from refactored.feature_extraction.model import ResNet50Model
-from refactored.preprocessing import preprocess
+from refactored.preprocessing import common_preprocessing
 
 
 class TestPreprocessingCbsr(unittest.TestCase):
@@ -47,9 +46,9 @@ class TestPreprocessingCbsr(unittest.TestCase):
         print("Cleanup done")
 
     def setUp(self):
-        self.models = [ResNet50Model()]
+        self.models = common_preprocessing.get_models()
         self.classifiers = [XGBoostClassifier()]
-        self.processor = preprocess.make_cbsr_processor(self.base_path_artifacts)
+        self.processor = common_preprocessing.make_cbsr_processor(self.base_path_artifacts)
 
     def organize_videos_by_subset_and_label(self):
         self.processor.organize_videos_by_subset_and_label()
@@ -245,13 +244,12 @@ class TestPreprocessingCbsr(unittest.TestCase):
 
         feature_classifier.classify_inter_dataset()
 
-
     def perform_metalearning_classification(self):
         metalearner_classifier = MetalearnerClassifier(features_root_path=self.output_features,
-                                                        base_output_path=self.output_classification,
-                                                        classifiers=self.classifiers,
-                                                        properties=self.processor.properties,
-                                                        models=self.models)
+                                                       base_output_path=self.output_classification,
+                                                       classifiers=self.classifiers,
+                                                       properties=self.processor.properties,
+                                                       models=self.models)
 
         metalearner_classifier._perform_meta_classification()
 
@@ -263,10 +261,10 @@ class TestPreprocessingCbsr(unittest.TestCase):
             # self.align_maps,
             # self.separate_maps_by_pai,
             # self.analyze_extracted_data,
-            # self.extract_features,
+            self.extract_features,
             # self.perform_intra_feature_classification,
             # self.perform_inter_feature_classification
-            self.perform_metalearning_classification
+            # self.perform_metalearning_classification
         ]
 
         for task in tasks:

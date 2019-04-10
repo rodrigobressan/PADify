@@ -13,7 +13,7 @@ from keras_applications.imagenet_utils import preprocess_input
 from keras_preprocessing import image
 from os.path import join
 
-from refactored.feature_extraction.model import BaseModel, ResNet50Model
+from refactored.feature_extraction.model import BaseModel
 from refactored.preprocessing.handler.datahandler import DataHandler, DiskHandler
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
 from tools.file_utils import file_helper
@@ -33,7 +33,7 @@ class FeatureExtractor:
                  train_alias: str = 'train',
                  test_alias: str = 'test',
                  attack_label: str = 'attack',
-                 real_label: str = 'real',):
+                 real_label: str = 'real', ):
         self.separated_root = separated_path
         self.models = models
         self.properties = properties
@@ -59,98 +59,7 @@ class FeatureExtractor:
         This method is used to perform the feature extraction on all the datasets located in the separated_by_pai folder
         """
 
-        # and then later process then
         self._process_datasets_all_frames()
-        #
-
-        # clean up
-        # shutil.rmtree(self.separated_atk_folder)
-
-    # def _process_attacks(self, datasets):
-    #     for dataset in datasets:
-    #         datasets_path = join(self.separated_root, dataset)
-    #         subset_list = os.listdir(datasets_path)
-    #
-    #         for subset in subset_list:
-    #             attack_path = join(self.separated_root, datasets_path, subset, self.attack_label)
-    #             real_path = join(self.separated_root, datasets_path, subset, self.real_label)
-    #
-    #             attack_list = os.listdir(attack_path)
-    #             # cut, print, tablet
-    #             for attack in attack_list:
-    #
-    #                 self._move_attack(attack, subset, dataset)
-    #                 # output_path = join(self.separated_atk_folder, attack)
-
-    # def _move_attack(self, attack: str, subset: str, dataset: str) -> None:
-
-    # def _move_all_attacks_to_single_folder(self, attack_path: str,
-    #                                        prop: PropertyExtractor,
-    #                                        output_path: str) -> None:
-    #     """
-    #     Used to move all the attacks (mask, tablet, etc) from a given subset (train, test) from a given property (depth,
-    #     illumination, saliency) into the same folder.
-    #     :param attack_path: where is the root of all the attacks
-    #     :param prop: the property which we're looking for
-    #     :param output_path: where the files will be stored
-    #     """
-    #     attacks_list = os.listdir(attack_path)
-    #     frames_to_merge = []
-    #     for attack in attacks_list:
-    #         attack_path_prop = join(attack_path, attack, prop.get_property_alias())
-    #         frames_attack = os.listdir(attack_path_prop)
-    #         frames_to_merge.extend(frames_attack)
-    #
-    #         for frame_name in frames_attack:
-    #             frame_path = join(attack_path_prop, frame_name)
-    #
-    #             # format: tablet_2_8_frame_0.jpg
-    #             name_with_atk = '%s_%s' % (attack, frame_name)
-    #             file_helper.copy_file_rename(frame_path, output_path, name_with_atk)
-    #
-    # def _move_real_to_temp(self, real_path: str, output_path: str) -> None:
-    #     """
-    #     Used to move all the real data into a new folder
-    #     :param real_path: where the real data is stored
-    #     :param output_path: where the data will be stored
-    #     """
-    #     frames_real = os.listdir(real_path)
-    #
-    #     for frame in frames_real:
-    #         frame_path = join(real_path, frame)
-    #         file_helper.copy_file(frame_path, output_path)
-    #
-    # def _prepare_files(self, datasets: List[str]) -> None:
-    #     """
-    #     Used to organise the files into the following structure:
-    #
-    #     Dataset [CBSR, RA]
-    #         Subset [Train, Test]
-    #             Labels [Real, Fake]
-    #                 Frame1.jpg
-    #                 Frame2.jpg
-    #     :param datasets: the list of datasets
-    #     """
-    #     for dataset in datasets:
-    #         dataset_path = join(self.separated_root, dataset)
-    #         subset_list = os.listdir(dataset_path)
-    #         for subset in subset_list:
-    #             for prop in self.properties:
-    #                 # subset root
-    #                 subset_path = join(self.separated_root, dataset, subset)
-    #
-    #                 # where the attack and real folders are located
-    #                 attack_path = join(subset_path, self.attack_label)
-    #                 real_path = join(subset_path, self.real_label, prop.get_property_alias())
-    #
-    #                 # where it will be stored
-    #                 base_tmp_dir = join(self.separated_atk_folder, dataset, subset)
-    #                 attack_merged_path = join(base_tmp_dir, self.attack_label, prop.get_property_alias())
-    #                 real_tmp_path = join(base_tmp_dir, self.real_label, prop.get_property_alias())
-    #
-    #                 # move both attack and real into new dirs
-    #                 self._move_all_attacks_to_single_folder(attack_path, prop, attack_merged_path)
-    #                 self._move_real_to_temp(real_path, real_tmp_path)
 
     def _process_datasets_all_frames(self):
         """
@@ -160,44 +69,46 @@ class FeatureExtractor:
         for dataset in datasets:
             dataset_path = join(self.separated_root, dataset)
 
-            if os.path.exists(join(self.output_features, dataset)):
-                print('%s already extracted features' % dataset)
-                continue
+            for model in self.models:
 
-            attacks_list = os.listdir(dataset_path)
+                attacks_list = os.listdir(dataset_path)
 
-            for attack in attacks_list:
-                attack_path = join(dataset_path, attack)
+                for attack in attacks_list:
+                    attack_path = join(dataset_path, attack)
 
-                for prop in self.properties:
-                    property_alias = prop.get_property_alias()
+                    for prop in self.properties:
+                        property_alias = prop.get_property_alias()
 
-                    path_train = join(attack_path, self.train_alias)
-                    path_test = join(attack_path, self.test_alias)
+                        if os.path.exists(
+                                join(self.output_features, dataset, attack, property_alias, model.get_alias())):
+                            print('%s already extracted features' % dataset)
+                            continue
 
-                    model = ResNet50Model()
+                        path_train = join(attack_path, self.train_alias)
+                        path_test = join(attack_path, self.test_alias)
 
-                    X_train, y_train, indexes_train, samples_train = self._get_dataset_contents(path_train,
+                        X_train, y_train, indexes_train, samples_train = self._get_dataset_contents(path_train,
+                                                                                                    property_alias)
+                        X_test, y_test, indexes_test, samples_test = self._get_dataset_contents(path_test,
                                                                                                 property_alias)
-                    X_test, y_test, indexes_test, samples_test = self._get_dataset_contents(path_test, property_alias)
 
-                    output_features = join(self.output_features, dataset, attack, property_alias, model.get_alias())
+                        output_features = join(self.output_features, dataset, attack, property_alias, model.get_alias())
 
-                    features_train = self._fetch_features(X_train, model, output_features, self.train_alias)
-                    features_test = self._fetch_features(X_test, model, output_features, self.test_alias)
+                        features_train = self._fetch_features(X_train, model, output_features, self.train_alias)
+                        features_test = self._fetch_features(X_test, model, output_features, self.test_alias)
 
-                    # saving features
-                    np.save(join(output_features, (NAME_FEATURES % self.train_alias)), features_train)
-                    np.save(join(output_features, (NAME_FEATURES % self.test_alias)), features_test)
+                        # saving features
+                        np.save(join(output_features, (NAME_FEATURES % self.train_alias)), features_train)
+                        np.save(join(output_features, (NAME_FEATURES % self.test_alias)), features_test)
 
-                    # saving targets
-                    np.save(join(output_features, (NAME_TARGETS % self.train_alias)), y_train)
-                    np.save(join(output_features, (NAME_TARGETS % self.test_alias)), y_test)
-                    np.save(join(output_features, (NAME_TARGETS % self.test_alias)), y_test)
+                        # saving targets
+                        np.save(join(output_features, (NAME_TARGETS % self.train_alias)), y_train)
+                        np.save(join(output_features, (NAME_TARGETS % self.test_alias)), y_test)
+                        np.save(join(output_features, (NAME_TARGETS % self.test_alias)), y_test)
 
-                    # saving samples names
-                    self.__save_txt(join(output_features, (NAME_SAMPLES % self.train_alias)), samples_train)
-                    self.__save_txt(join(output_features, (NAME_SAMPLES % self.test_alias)), samples_test)
+                        # saving samples names
+                        self.__save_txt(join(output_features, (NAME_SAMPLES % self.train_alias)), samples_train)
+                        self.__save_txt(join(output_features, (NAME_SAMPLES % self.test_alias)), samples_test)
 
     def __save_txt(self, output_path: str, content: List[str]) -> None:
         """

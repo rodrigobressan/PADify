@@ -3,13 +3,13 @@ from typing import List
 from os.path import join
 
 from refactored.preprocessing.Video import Video
-from refactored.preprocessing.pai.pai import Pai
 from refactored.preprocessing.preprocessor import Preprocessor
 from refactored.preprocessing.processor.replay_attack.ra_pai import DefaultPaiConfig
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
+from tools.file_utils import file_helper
 
 
-class RaProcessor(Preprocessor):
+class NuaaProcessor(Preprocessor):
     """
     Used to preprocess the Replay Attack dataset
     """
@@ -18,13 +18,10 @@ class RaProcessor(Preprocessor):
                  dataset_name: str,
                  properties: List[PropertyExtractor]):
         self.pai_config = DefaultPaiConfig()
-        self.pai_config.add_pai(Pai('highdef', ['highdef']))
-        self.pai_config.add_pai(Pai('mobile', ['mobile']))
-        self.pai_config.add_pai(Pai('print', ['print']))
 
-        super(RaProcessor, self).__init__(artifacts_root=artifacts_root,
-                                          dataset_name=dataset_name,
-                                          properties=properties)
+        super(NuaaProcessor, self).__init__(artifacts_root=artifacts_root,
+                                            dataset_name=dataset_name,
+                                            properties=properties, attack_label='fake')
 
     """
     Overridden methods
@@ -44,21 +41,37 @@ class RaProcessor(Preprocessor):
                         Features (.npy)
                         Models (.sav)
        """
+        root_path = self.videos_root
+        train_fake_indexes = join(root_path, 'imposter_train_raw.txt')
+        train_real_indexes = join(root_path, 'client_train_raw.txt')
 
-        subset_list = self.handler.list_files(self.videos_root)  # List all subsets (train, test)
+        test_fake_indexes = join(root_path, 'imposter_test_raw.txt')
+        test_real_indexes = join(root_path, 'client_test_raw.txt')
 
-        for subset in subset_list:
-            print(subset)
-            subset_path = join(self.videos_root, subset)
-            labels_list = self.handler.list_files(subset_path)  # List all labels (attack, real)
+        output_path = self.extracted_frames_root
+        real_path = join(root_path, 'ClientRaw')
+        fake_path = join(root_path, 'ImposterRaw')
 
-            for label in labels_list:
-                label_path = join(subset_path, label)
-                video_list = self.handler.list_files(label_path)  # List all videos from a given person
+        self.move_files_into_set(output_path, real_path, train_real_indexes, 'train', 'real')
+        self.move_files_into_set(output_path, real_path, test_real_indexes, 'test', 'real')
 
-                for video_name in video_list:
-                    person = video_name.split('_')[2]
-                    self.process_video(label_path, person, subset, video_name)
+        self.move_files_into_set(output_path, fake_path, train_fake_indexes, 'train', 'fake')
+        self.move_files_into_set(output_path, fake_path, test_fake_indexes, 'test', 'fake')
+
+    def move_files_into_set(self, output_path: str, origin_path: str, indexes_path: str, set, label: str):
+        print(set + ' ' + label)
+        with (open(indexes_path, 'r')) as f:
+            files = f.readlines()
+            for file in files:
+                file_fixed = file.replace('\\', '/').replace('\n', '')
+                file_name = file_fixed.split('/')[1]
+                current_file = join(origin_path, file_fixed)
+
+                output = join(output_path, set, label)
+                print('    current file:', current_file)
+                print('    output:', output)
+                print('    final name:', file_name)
+                file_helper.copy_file_rename(current_file, output, file_name)
 
     def get_attack_alias_from_frame_name(self, frame_name) -> str:
         """"

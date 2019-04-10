@@ -1,7 +1,7 @@
 from refactored.preprocessing.pai.pai import BasePaiConfig, Pai
 
 
-class RaPaiConfig(BasePaiConfig):
+class DefaultPaiConfig(BasePaiConfig):
     """
     This is an example of the BasePaiConfig class for the Replay Attack dataset
     """

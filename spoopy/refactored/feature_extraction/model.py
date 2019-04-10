@@ -1,5 +1,7 @@
-from abc import ABC, abstractmethod
-from keras.applications import ResNet50
+from abc import ABC
+from keras.applications import ResNet50, InceptionV3, MobileNet, NASNetMobile, NASNetLarge, VGG16, VGG19, Xception, \
+    InceptionResNetV2, MobileNetV2
+from keras_applications.densenet import DenseNet, DenseNet121
 
 
 class BaseModel(ABC):
@@ -8,43 +10,83 @@ class BaseModel(ABC):
     ResNet50Model class to see an example of how it is done
     """
 
-    @abstractmethod
+    def __init__(self, model, alias: str):
+        self.model = model
+        self.alias = alias
+
     def get_model(self):
         """
         This should return the compiled model to be used
         """
-        raise NotImplementedError()
+        return self.model
 
-    @abstractmethod
     def get_alias(self) -> str:
         """
         This should return an alias to identify the model
         :return:
         """
-        raise NotImplementedError()
+        return self.alias
 
-    @abstractmethod
     def predict(self, X):
         """
         This should be used to perform the prediction on a given set of features
         :param X:
         :return:
         """
-        raise NotImplementedError()
+        print('Predicting with model: %s' % self.alias)
+        return self.model.predict(X)
 
 
 class ResNet50Model(BaseModel):
-    """
-    This is an example model using the ResNet50 Model
-    """
     def __init__(self):
-        self.model = ResNet50()
+        super().__init__(ResNet50(), "resnet50")
 
-    def get_alias(self) -> str:
-        return "resnet"
 
-    def get_model(self):
-        return self.model
+class DenseNetModel(BaseModel):
+    def __init__(self):
+        super().__init__(DenseNet121(), "densenet121")
 
-    def predict(self, X):
-        return self.model.predict(X)
+
+class InceptionV3Model(BaseModel):
+    def __init__(self):
+        super().__init__(InceptionV3(), "inceptionv3")
+
+
+class MobileNetModel(BaseModel):
+    def __init__(self):
+        super().__init__(MobileNet(), "mobilenet")
+
+
+class MobileNetV2Model(BaseModel):
+    def __init__(self):
+        super().__init__(MobileNetV2(), "mobilenetv2")
+
+
+class NasNetMobileModel(BaseModel):
+    def __init__(self):
+        super().__init__(NASNetMobile(), "nasnetmobile")
+
+
+class NasNetLargeModel(BaseModel):
+    def __init__(self):
+        super().__init__(NASNetLarge(), "nasnetlarge")
+
+
+class Vgg16Model(BaseModel):
+    def __init__(self):
+        super().__init__(VGG16(), "vgg16")
+
+
+class Vgg19Model(BaseModel):
+    def __init__(self):
+        super().__init__(VGG19(), "vgg19")
+
+
+class XceptionModel(BaseModel):
+    def __init__(self):
+        super().__init__(Xception(), "xception")
+
+
+class InceptionResnetV2Model(BaseModel):
+    def __init__(self):
+        super().__init__(InceptionResNetV2(), "inceptionresnetv2")
