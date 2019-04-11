@@ -275,6 +275,7 @@ class Preprocessor(ABC):
                 attack_alias = self.get_attack_alias_from_frame_name(frame_name)
 
                 # format: /root/attack_alias/subset/label/property
+                print('attack alias name:', frame_name)
                 output_path = join(self.separated_pai_root, attack_alias, subset, label, prop)
                 self.copy_if_not_exists(original_path, output_path, frame_name)
             else:

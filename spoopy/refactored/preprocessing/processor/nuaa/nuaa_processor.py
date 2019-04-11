@@ -1,6 +1,5 @@
-from typing import List
-
 from os.path import join
+from typing import List
 
 from refactored.preprocessing.Video import Video
 from refactored.preprocessing.preprocessor import Preprocessor
@@ -112,8 +111,42 @@ class NuaaProcessor(Preprocessor):
         Used to get the PAI alias from the file name
         :param name: the name of the file
         :return: the PAI alias
+
+        0 - id
+        1 - glasses
+            0 = with, 1 = no
+        2 - location and light conditions
+            01: up-down-rotate
+            02: up-down-twist
+            03: left-right-rotate
+            04: left-right-twist
+            05: close--window-open-lights
+            07: open-window-open-lights
+            08: open-widow-shut-lights
+            08: still
+        3 - session
+        4 - pic number
         """
-        return name.split('_')[6]
+
+        variation = name.split('_')[2]
+
+
+        if variation == '01' or variation == '00':
+            return 'up-down-rotate'
+        if variation == '02':
+            return 'up-down-twist'
+        if variation == '03':
+            return 'left-right-rotate'
+        if variation == '04':
+            return 'left-right-twist'
+        if variation == '05':
+            return 'close--window-open-lights'
+        if variation == '06':
+            return 'open-window-open-lights'
+        if variation == '07':
+            return 'open-widow-shut-lights'
+        if variation == '08':
+            return 'still'
 
     def remove_video_extension(self, video_name: str) -> str:
         """
