@@ -7,9 +7,12 @@ from keras.layers import Dense
 from keras.models import Model
 from keras.optimizers import Adam
 
+from refactored.finetuning.multi_gpu import to_multi_gpu
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 import matplotlib.pyplot as plt
+import argparse
 
 DATA_DIR = '/codes/bresan/remote/spoopy/spoopy/refactored/tests/artifacts_bkp/extracted_frames/cbsr'
 TRAIN_DIR = os.path.join(DATA_DIR, 'train')
@@ -17,7 +20,13 @@ VALID_DIR = os.path.join(DATA_DIR, 'test')
 SIZE = (224, 224)
 BATCH_SIZE = 16
 
+# definine the total number of epochs to train for along with the
+# initial learning rate
+NUM_EPOCHS = 70
+INIT_LR = 5e-3
+
 if __name__ == "__main__":
+
     num_train_samples = sum([len(files) for r, d, files in os.walk(TRAIN_DIR)])
     num_valid_samples = sum([len(files) for r, d, files in os.walk(VALID_DIR)])
 
@@ -40,6 +49,7 @@ if __name__ == "__main__":
         layer.trainable = False
     last = model.layers[-1].output
     x = Dense(len(classes), activation="softmax")(last)
+
     finetuned_model = Model(model.input, x)
     finetuned_model.compile(optimizer=Adam(lr=0.0001), loss='categorical_crossentropy', metrics=['accuracy'])
     for c in batches.class_indices:
