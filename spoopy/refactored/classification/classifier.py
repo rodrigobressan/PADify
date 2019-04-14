@@ -49,18 +49,3 @@ class XGBoostClassifier(BaseClassifier):
 
     def get_alias(self):
         return "xgb"
-
-#
-#
-# class XGBoostClassifier(BaseClassifier):
-#     def __int__(self):
-#         classifier = OneVsRestClassifier(BaggingClassifier(SVC(verbose=True), n_jobs=-1))
-#         # classifier = XGBClassifier()
-#         super().__init__(classifier)
-#
-#     def predict_proba(self, X):
-#         return self.classifier.predict_proba(X)
-#
-#     def get_alias(self):
-#         return "xgb"
-

@@ -9,11 +9,11 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 from refactored.classification.classifier import SvcClassifier
-from refactored.classification.feature.feature_classifier import BasePredictor
-from refactored.classification.feature.inter_classifier import InterBasePredictor
-from refactored.classification.feature.intra_classifier import IntraBasePredictor
+from refactored.classification.feature.feature_predictor import BasePredictor
+from refactored.classification.feature.inter_feature_classifier import InterBasePredictor
+from refactored.classification.feature.intra_feature_classifier import IntraBasePredictor
 from refactored.feature_extraction.feature_extraction import FeatureExtractor
-from refactored.feature_extraction.model import ResNet50Model
+from refactored.feature_extraction.cnn_model import ResNet50Model
 from refactored.preprocessing import common_preprocessing
 
 
@@ -123,7 +123,7 @@ class TestIntegrationPipeline(unittest.TestCase):
                                         'ra',
                                         target,
                                         prop.get_property_alias(),
-                                        model.get_alias())
+                                        model.alias)
 
                     for artifact in expected_artifacts:
                         path_artifact = os.path.join(path, artifact)
@@ -166,7 +166,7 @@ class TestIntegrationPipeline(unittest.TestCase):
                                                  dataset,
                                                  feature_classifier.target_all,
                                                  prop.get_property_alias(),
-                                                 model.get_alias(),
+                                                 model.alias,
                                                  classifier.get_alias())
 
                         for artifact in expected_artifacts:
@@ -191,7 +191,7 @@ class TestIntegrationPipeline(unittest.TestCase):
                                                      dataset_target,
                                                      feature_classifier.target_all,
                                                      prop.get_property_alias(),
-                                                     model.get_alias(),
+                                                     model.alias,
                                                      classifier.get_alias())
 
                             for artifact in expected_artifacts:

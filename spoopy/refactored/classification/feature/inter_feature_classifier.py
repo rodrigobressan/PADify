@@ -3,8 +3,8 @@ from os.path import join
 
 from refactored.classification import features_utils
 from refactored.classification.classifier import BaseClassifier
-from refactored.classification.feature.feature_classifier import BasePredictor
-from refactored.feature_extraction.model import BaseModel
+from refactored.classification.feature.feature_predictor import BasePredictor
+from refactored.feature_extraction.cnn_model import CnnModel
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
 
 
@@ -29,14 +29,14 @@ class InterBasePredictor(BasePredictor):
                                 dataset_origin: str,
                                 dataset_target: str,
                                 classifier: BaseClassifier,
-                                model: BaseModel,
+                                model: CnnModel,
                                 prop: PropertyExtractor):
 
         origin_path = join(self.features_root_path, dataset_origin, self.target_all, prop.get_property_alias(),
-                           model.get_alias())
+                           model.alias)
 
         target_path = join(self.features_root_path, dataset_target, self.target_all, prop.get_property_alias(),
-                           model.get_alias())
+                           model.alias)
 
         X_train = features_utils.concatenate_features(origin_path)
         X_test = features_utils.concatenate_features(target_path)
@@ -57,7 +57,7 @@ class InterBasePredictor(BasePredictor):
                           dataset_target,
                           self.target_all,
                           prop.get_property_alias(),
-                          model.get_alias(),
+                          model.alias,
                           classifier.get_alias())
 
         self._save_artifacts(classifier, output_dir, y_pred, y_proba, results)

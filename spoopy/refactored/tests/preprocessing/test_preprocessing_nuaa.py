@@ -6,14 +6,14 @@ import os
 import shutil
 from os.path import exists, join
 
-from refactored.classification.feature.inter_classifier import InterBasePredictor
+from refactored.classification.feature.inter_feature_classifier import InterBasePredictor
 from refactored.classification.metalearner.metalearner_classifier import MetalearnerClassifier
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 from refactored.classification.classifier import XGBoostClassifier
-from refactored.classification.feature.intra_classifier import IntraBasePredictor
+from refactored.classification.feature.intra_feature_classifier import IntraBasePredictor
 from refactored.feature_extraction.feature_extraction import FeatureExtractor
 from refactored.preprocessing import common_preprocessing
 
@@ -134,7 +134,7 @@ class TestPreprocessingNuaa(unittest.TestCase):
                                         'cbsr',
                                         target,
                                         prop.get_property_alias(),
-                                        model.get_alias())
+                                        model.alias)
 
                     for artifact in expected_artifacts:
                         path_artifact = os.path.join(path, artifact)

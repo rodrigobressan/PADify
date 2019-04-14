@@ -5,9 +5,9 @@ import os
 from os.path import join
 
 from refactored.classification.classifier import BaseClassifier
-from refactored.classification.feature.feature_classifier import BasePredictor
+from refactored.classification.feature.feature_predictor import BasePredictor
 from refactored.feature_extraction.feature_extraction import NAME_FEATURES, NAME_TARGETS, NAME_SAMPLES
-from refactored.feature_extraction.model import BaseModel
+from refactored.feature_extraction.cnn_model import CnnModel
 from refactored.io_utils import load_txt
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
 
@@ -34,16 +34,16 @@ class IntraBasePredictor(BasePredictor):
 
     def _classify_intra_dataset(self, dataset: str,
                                 classifier: BaseClassifier,
-                                model: BaseModel,
+                                model: CnnModel,
                                 prop: PropertyExtractor):
 
         path_features = join(self.features_root_path, dataset, self.target_all, prop.get_property_alias(),
-                             model.get_alias())
+                             model.alias)
 
         output_dir = os.path.join(self.intra_dataset_output, dataset,
                                   self.target_all,
                                   prop.get_property_alias(),
-                                  model.get_alias(),
+                                  model.alias,
                                   classifier.get_alias())
 
         print('features: ', path_features)

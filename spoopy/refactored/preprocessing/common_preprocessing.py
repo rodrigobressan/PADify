@@ -1,4 +1,4 @@
-from refactored.feature_extraction.model import *
+from refactored.feature_extraction.cnn_model import *
 from refactored.preprocessing.processor.cbsr.cbsr_processor import CbsrProcessor
 from refactored.preprocessing.processor.deep_fakes.deep_fakes_processor import DeepFakesProcessor
 from refactored.preprocessing.processor.nuaa.nuaa_processor import NuaaProcessor

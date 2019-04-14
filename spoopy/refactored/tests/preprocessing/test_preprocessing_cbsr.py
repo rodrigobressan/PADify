@@ -6,14 +6,15 @@ import os
 import shutil
 from os.path import exists, join
 
-from refactored.classification.feature.inter_classifier import InterBasePredictor
+from refactored.classification.feature.inter_feature_classifier import InterBasePredictor
+from refactored.classification.finetuning.inter_finetuning_classifier import InterFinetuningClassifier
 from refactored.classification.metalearner.metalearner_classifier import MetalearnerClassifier
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 from refactored.classification.classifier import XGBoostClassifier
-from refactored.classification.feature.intra_classifier import IntraBasePredictor
+from refactored.classification.feature.intra_feature_classifier import IntraBasePredictor
 from refactored.feature_extraction.feature_extraction import FeatureExtractor
 from refactored.preprocessing import common_preprocessing
 
@@ -22,6 +23,8 @@ class TestPreprocessingCbsr(unittest.TestCase):
     base_path_artifacts = '../artifacts_bkp'
     output_features = os.path.join(base_path_artifacts, 'features')
     output_classification = os.path.join(base_path_artifacts, 'classification')
+    output_finetuning = os.path.join(base_path_artifacts, 'finetuning')
+    output_separated = os.path.join(base_path_artifacts, 'separated_by_pai')
 
     artifacts_being_tested = ['test/attack/%s1_3%s.%s',
                               'test/real/%s1_1%s.%s',
@@ -134,7 +137,7 @@ class TestPreprocessingCbsr(unittest.TestCase):
                                         'cbsr',
                                         target,
                                         prop.get_property_alias(),
-                                        model.get_alias())
+                                        model.alias)
 
                     for artifact in expected_artifacts:
                         path_artifact = os.path.join(path, artifact)
@@ -253,6 +256,14 @@ class TestPreprocessingCbsr(unittest.TestCase):
 
         metalearner_classifier._perform_meta_classification()
 
+    def perform_finetuning(self):
+        finetuner = InterFinetuningClassifier(images_root_path=self.output_separated,
+                                              base_output_path=self.output_finetuning,
+                                              models=self.models,
+                                              properties=self.processor.properties)
+
+        finetuner.classify_inter_dataset()
+
     def test_preprocessor(self):
         tasks = [
             # self.organize_videos_by_subset_and_label,
@@ -261,10 +272,11 @@ class TestPreprocessingCbsr(unittest.TestCase):
             # self.align_maps,
             # self.separate_maps_by_pai,
             # self.analyze_extracted_data,
-            self.extract_features,
+            # self.extract_features,
             # self.perform_intra_feature_classification,
             # self.perform_inter_feature_classification
-            # self.perform_metalearning_classification
+            # self.perform_metalearning_classification,
+            self.perform_finetuning
         ]
 
         for task in tasks:

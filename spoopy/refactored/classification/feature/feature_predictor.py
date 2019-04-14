@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 from refactored.classification.classifier import BaseClassifier
-from refactored.feature_extraction.model import BaseModel
+from refactored.feature_extraction.cnn_model import CnnModel
 from refactored.io_utils import save_txt
 from refactored.preprocessing.handler.datahandler import DataHandler, DiskHandler
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
@@ -28,7 +28,7 @@ class BasePredictor:
                  base_output_path: str,
                  classifiers: List[BaseClassifier],
                  properties: List[PropertyExtractor],
-                 models: List[BaseModel],
+                 models: List[CnnModel],
                  data_handler: DataHandler = DiskHandler(),
                  train_alias: str = 'train',
                  test_alias: str = 'test',

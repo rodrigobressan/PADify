@@ -4,7 +4,7 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 from refactored.classification.classifier import SvcClassifier
-from refactored.feature_extraction.model import ResNet50Model
+from refactored.feature_extraction.cnn_model import ResNet50Model
 from refactored.preprocessing import common_preprocessing
 
 base_path_artifacts = 'tests/artifacts_bkp'

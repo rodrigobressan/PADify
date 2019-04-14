@@ -13,7 +13,7 @@ from keras_applications.imagenet_utils import preprocess_input
 from keras_preprocessing import image
 from os.path import join
 
-from refactored.feature_extraction.model import BaseModel
+from refactored.feature_extraction.cnn_model import CnnModel
 from refactored.preprocessing.handler.datahandler import DataHandler, DiskHandler
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
 from tools.file_utils import file_helper
@@ -27,7 +27,7 @@ class FeatureExtractor:
     def __init__(self,
                  separated_path: str,
                  output_features: str,
-                 models: List[BaseModel],
+                 models: List[CnnModel],
                  properties: List[PropertyExtractor],
                  data_handler: DataHandler = DiskHandler(),
                  train_alias: str = 'train',
@@ -80,7 +80,7 @@ class FeatureExtractor:
                         property_alias = prop.get_property_alias()
 
                         if os.path.exists(
-                                join(self.output_features, dataset, attack, property_alias, model.get_alias())):
+                                join(self.output_features, dataset, attack, property_alias, model.alias)):
                             print('%s already extracted features' % dataset)
                             continue
 
@@ -92,7 +92,7 @@ class FeatureExtractor:
                         X_test, y_test, indexes_test, samples_test = self._get_dataset_contents(path_test,
                                                                                                 property_alias)
 
-                        output_features = join(self.output_features, dataset, attack, property_alias, model.get_alias())
+                        output_features = join(self.output_features, dataset, attack, property_alias, model.alias)
 
                         features_train = self._fetch_features(X_train, model, output_features, self.train_alias)
                         features_test = self._fetch_features(X_test, model, output_features, self.test_alias)
@@ -218,7 +218,7 @@ class FeatureExtractor:
 
         return X, y, indexes, samples_names
 
-    def _fetch_features(self, X: np.ndarray, model: BaseModel, output_path: str, subset) -> np.ndarray:
+    def _fetch_features(self, X: np.ndarray, model: CnnModel, output_path: str, subset) -> np.ndarray:
         """
         Used to fetch all the features predicted from a given model
         :param X: the np.ndarray containing the features
