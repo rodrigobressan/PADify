@@ -1,3 +1,9 @@
+import matplotlib
+
+from refactored.classification.finetuning.intra_finetuning_classifier import IntraFinetuningClassifier
+
+matplotlib.use('Agg')
+
 import pathlib
 import time
 import unittest
@@ -10,8 +16,8 @@ from refactored.classification.feature.inter_feature_classifier import InterBase
 from refactored.classification.finetuning.inter_finetuning_classifier import InterFinetuningClassifier
 from refactored.classification.metalearner.metalearner_classifier import MetalearnerClassifier
 
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 from refactored.classification.classifier import XGBoostClassifier
 from refactored.classification.feature.intra_feature_classifier import IntraBasePredictor
@@ -256,13 +262,21 @@ class TestPreprocessingCbsr(unittest.TestCase):
 
         metalearner_classifier._perform_meta_classification()
 
-    def perform_finetuning(self):
+    def perform_inter_finetuning(self):
         finetuner = InterFinetuningClassifier(images_root_path=self.output_separated,
                                               base_output_path=self.output_finetuning,
                                               models=self.models,
                                               properties=self.processor.properties)
 
         finetuner.classify_inter_dataset()
+
+    def perform_intra_finetuning(self):
+        finetuner = IntraFinetuningClassifier(images_root_path=self.output_separated,
+                                              base_output_path=self.output_finetuning,
+                                              models=self.models,
+                                              properties=self.processor.properties)
+
+        finetuner.classify_intra_dataset()
 
     def test_preprocessor(self):
         tasks = [
@@ -276,7 +290,8 @@ class TestPreprocessingCbsr(unittest.TestCase):
             # self.perform_intra_feature_classification,
             # self.perform_inter_feature_classification
             # self.perform_metalearning_classification,
-            self.perform_finetuning
+            # self.perform_inter_finetuning
+            self.perform_intra_finetuning
         ]
 
         for task in tasks:

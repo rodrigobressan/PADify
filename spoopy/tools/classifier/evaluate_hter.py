@@ -45,7 +45,7 @@ def analyze_results(dict_results):
             mode_predictions = mode(dict_results[result][0])
             truth = dict_results[result][1][0]
 
-            if truth == 0:  # fake
+            if truth == 0:  # fake/attack
                 count_fake = count_fake + 1
                 if mode_predictions != 0:
                     fa = fa + 1

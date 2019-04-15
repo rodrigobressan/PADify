@@ -24,31 +24,27 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
-class InterFinetuningClassifier(BaseFinetuner):
-    def classify_inter_dataset(self):
-        for origin, target, prop, model in self._list_inter_combinations(self.images_root_path):
-            self._classify_inter_dataset(dataset_origin=origin,
-                                         dataset_target=target,
+class IntraFinetuningClassifier(BaseFinetuner):
+    def classify_intra_dataset(self):
+        for origin, prop, model in self._list_combinations(self.images_root_path):
+            self._classify_intra_dataset(dataset_origin=origin,
                                          model=model,
                                          prop=prop)
 
-    def _list_inter_combinations(self, path: str):
+    def _list_combinations(self, path: str):
         # datasets = os.listdir(path)
         datasets = ["cbsr", "ra"]
         for dataset_origin in datasets:
-            for dataset_target in [element for element in datasets if element != dataset_origin]:
+            for prop, model in self._list_variations():
+                yield [dataset_origin, model, prop]
 
-                for prop, model in self._list_variations():
-                    yield [dataset_origin, dataset_target, model, prop]
-
-    def _classify_inter_dataset(self,
+    def _classify_intra_dataset(self,
                                 dataset_origin: str,
-                                dataset_target: str,
                                 model: CnnModel,
                                 prop: PropertyExtractor):
 
         train_path = join(self.images_root_path, dataset_origin, self.target_all, "train")
-        test_path = join(self.images_root_path, dataset_target, self.target_all, "test")
+        test_path = join(self.images_root_path, dataset_origin, self.target_all, "test")
 
         X_train, y_train, indexes_train, names_train = self._get_dataset_contents(model, train_path,
                                                                                   prop.get_property_alias())
@@ -77,9 +73,8 @@ class InterFinetuningClassifier(BaseFinetuner):
 
         print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
 
-        output_dir = join(self.inter_dataset_output,
+        output_dir = join(self.intra_dataset_output,
                           dataset_origin,
-                          dataset_target,
                           self.target_all,
                           prop.get_property_alias(),
                           model.alias)

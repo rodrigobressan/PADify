@@ -13,8 +13,6 @@ from keras.layers import Dense
 from keras.models import Model
 from keras.optimizers import Adam
 
-# from refactored.finetuning.multi_gpu import to_multi_gpu
-
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 import matplotlib.pyplot as plt
@@ -48,12 +46,11 @@ def perform_finetuning():
     test_data = gen.flow_from_directory(VALID_DIR, target_size=SIZE, class_mode='binary', shuffle=True,
                                         batch_size=BATCH_SIZE)
 
+    train(train_data, test_data, model, num_train_steps, num_valid_steps)
 
-    train(train_data, model, num_train_steps, num_valid_steps, test_data)
 
-
-def train(batches, model, num_train_steps, num_valid_steps, val_batches):
-    classes = list(iter(batches.class_indices))
+def train(train_batches, test_batches, model, num_train_steps, num_test_steps):
+    classes = list(iter(train_batches.class_indices))
     model.layers.pop()
     for layer in model.layers:
         layer.trainable = False
@@ -62,14 +59,14 @@ def train(batches, model, num_train_steps, num_valid_steps, val_batches):
     finetuned_model = Model(model.input, x)
     # finetuned_model = multi_gpu_model(finetuned_model, gpus=2)
     finetuned_model.compile(optimizer=Adam(lr=0.00001), loss='binary_crossentropy', metrics=['accuracy'])
-    for c in batches.class_indices:
-        classes[batches.class_indices[c]] = c
+    for c in train_batches.class_indices:
+        classes[train_batches.class_indices[c]] = c
     finetuned_model.classes = classes
     early_stopping = EarlyStopping(patience=10)
     checkpointer = ModelCheckpoint('resnet50_best.h5', verbose=1, save_best_only=True)
-    history = finetuned_model.fit_generator(batches, steps_per_epoch=num_train_steps, epochs=1000,
-                                            callbacks=[early_stopping, checkpointer], validation_data=val_batches,
-                                            validation_steps=num_valid_steps)
+    history = finetuned_model.fit_generator(train_batches, steps_per_epoch=num_train_steps, epochs=1000,
+                                            callbacks=[early_stopping, checkpointer], validation_data=test_batches,
+                                            validation_steps=num_test_steps)
     finetuned_model.save('resnet50_final.h5')
     with open('history.json', 'w') as f:
         json.dump(history.history, f)

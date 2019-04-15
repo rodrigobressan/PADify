@@ -28,14 +28,14 @@ def get_properties():
 def get_models():
     models = [
         ResNet50Model(),
-        DenseNetModel(),
+        # DenseNetModel(),
         # InceptionV3Model(),
-        MobileNetModel(),
-        MobileNetV2Model(),
-        NasNetMobileModel(),
+        # MobileNetModel(),
+        # MobileNetV2Model(),
+        # NasNetMobileModel(),
         # NasNetLargeModel(),
-        Vgg16Model(),
-        Vgg19Model(),
+        # Vgg16Model(),
+        # Vgg19Model(),
         # XceptionModel(),
         # InceptionResnetV2Model()§
     ]
