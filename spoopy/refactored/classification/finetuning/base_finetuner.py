@@ -9,13 +9,12 @@ from refactored.preprocessing.property.original_extractor import OriginalExtract
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
-import json
 from typing import List, Tuple
 
 import numpy as np
 import os
 from keras import Model
-from keras.callbacks import EarlyStopping, TensorBoard, ReduceLROnPlateau
+from keras.callbacks import TensorBoard, ReduceLROnPlateau
 from keras.layers import Dense
 from keras.optimizers import Adam
 
@@ -25,6 +24,7 @@ from refactored.preprocessing.handler.datahandler import DiskHandler, DataHandle
 from refactored.preprocessing.property.property_extractor import PropertyExtractor
 from tools.classifier import evaluate_hter
 from tools.file_utils import file_helper
+import pickle
 
 
 class BaseFinetuner():
@@ -33,8 +33,8 @@ class BaseFinetuner():
     MODEL_NAME = "model.h5"
     WEIGHTS_NAME = "weights.h5"
     RESULTS_NAME = "results.txt"
-    HISTORY_NAME = "history.json"
-    TIMES_NAME = "times.json"
+    HISTORY_NAME = "history.pickle"
+    TIMES_NAME = "times.pickle"
 
     IMG_LOSS_EPOCH = "loss_epoch.png"
     IMG_ACC_EPOCH = "acc_epoch.png"
@@ -75,7 +75,7 @@ class BaseFinetuner():
 
         # models = [resnet, vgg, etc]
         for model in self.models:
-            for prop in [IlluminationExtractor(), OriginalExtractor()]:
+            for prop in [OriginalExtractor(), IlluminationExtractor()]:
                 yield [model, prop]
 
     def _save_artifacts(self, model: CnnModel,
@@ -100,13 +100,13 @@ class BaseFinetuner():
         model.save(join(output_dir, self.MODEL_NAME))
         model.save_weights(join(output_dir, self.WEIGHTS_NAME))
 
+        with open(join(output_dir, self.HISTORY_NAME), 'wb') as file_pi:
+            pickle.dump(history.history, file_pi)
 
-        with open(join(output_dir, self.HISTORY_NAME), 'w') as f:
-            json.dump(history.history, f)
+        with open(join(output_dir, self.TIMES_NAME), 'wb') as file_pi:
+            pickle.dump(time_callback.times, file_pi)
 
-        with open(join(output_dir, self.TIMES_NAME), 'w') as f:
-            json.dump(time_callback.times, f)
-
+        plt.clf()
         plt.plot(history.history['acc'])
         plt.plot(history.history['val_acc'])
         plt.title('model accuracy')
@@ -141,8 +141,10 @@ class BaseFinetuner():
         ft_model = multi_gpu_model(ft_model, gpus=2)
         ft_model.compile(optimizer=Adam(lr=0.00001), loss='binary_crossentropy', metrics=['accuracy'])
 
-
         time_callback = TimeHistory()
+
+        reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
+                                      patience=5, min_lr=0.000001)
 
         tensorboard = TensorBoard(log_dir='/codes/bresan/remote/spoopy/spoopy/refactored/classification/finetuning',
                                   histogram_freq=0,
@@ -150,8 +152,8 @@ class BaseFinetuner():
 
         history = ft_model.fit_generator(train_batches,
                                          steps_per_epoch=num_train_steps,
-                                         epochs=100,
-                                         callbacks=[time_callback, tensorboard],
+                                         epochs=2,
+                                         callbacks=[time_callback, reduce_lr],
                                          validation_data=test_batches,
                                          validation_steps=num_test_steps)
 

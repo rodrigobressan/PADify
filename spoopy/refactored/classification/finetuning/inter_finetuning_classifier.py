@@ -70,7 +70,7 @@ class InterFinetuningClassifier(BaseFinetuner):
         train_data = gen.flow(X_train, y_train, shuffle=True, batch_size=self.BATCH_SIZE)
         test_data = gen.flow(X_test, y_test, shuffle=True, batch_size=self.BATCH_SIZE)
         #
-        finetuned_model, history, time_callback = self.train(train_data, test_data, model.model, num_train_steps, num_valid_steps)
+        finetuned_model, history, time_callback = self.train(train_data, test_data, model.__model, num_train_steps, num_valid_steps)
 
         y_pred = self._predict(finetuned_model, X_test)
         results = self._evaluate_results(y_pred, y_test, names_test)
