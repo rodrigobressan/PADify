@@ -152,7 +152,7 @@ class BaseFinetuner():
 
         history = ft_model.fit_generator(train_batches,
                                          steps_per_epoch=num_train_steps,
-                                         epochs=2,
+                                         epochs=50,
                                          callbacks=[time_callback, reduce_lr],
                                          validation_data=test_batches,
                                          validation_steps=num_test_steps)

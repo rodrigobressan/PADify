@@ -43,6 +43,16 @@ class IntraFinetuningClassifier(BaseFinetuner):
                                 model: CnnModel,
                                 prop: PropertyExtractor):
 
+        output_dir = join(self.intra_dataset_output,
+                          dataset_origin,
+                          self.target_all,
+                          prop.get_property_alias(),
+                          model.alias)
+
+        if os.path.exists(output_dir):
+            print('Dataset %s for property %s with model %s already trained' % (dataset_origin, prop.get_property_alias(), model.alias))
+            return
+
         train_path = join(self.images_root_path, dataset_origin, self.target_all, "train")
         test_path = join(self.images_root_path, dataset_origin, self.target_all, "test")
 
@@ -78,11 +88,7 @@ class IntraFinetuningClassifier(BaseFinetuner):
 
         print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
 
-        output_dir = join(self.intra_dataset_output,
-                          dataset_origin,
-                          self.target_all,
-                          prop.get_property_alias(),
-                          model.alias)
+
 
         self._save_artifacts(finetuned_model, history, output_dir, y_pred, results, time_callback)
 
