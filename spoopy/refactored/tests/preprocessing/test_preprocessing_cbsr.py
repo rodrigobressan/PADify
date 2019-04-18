@@ -290,8 +290,8 @@ class TestPreprocessingCbsr(unittest.TestCase):
             # self.perform_intra_feature_classification,
             # self.perform_inter_feature_classification
             # self.perform_metalearning_classification,
-            # self.perform_inter_finetuning
-            self.perform_intra_finetuning
+            self.perform_inter_finetuning
+            # self.perform_intra_finetuning
         ]
 
         for task in tasks:

@@ -41,19 +41,48 @@ class InterFinetuningClassifier(BaseFinetuner):
                 for prop, model in self._list_variations():
                     yield [dataset_origin, dataset_target, model, prop]
 
+    def _get_all_subsets_from_dataset(self,
+                                      dataset_alias: str,
+                                      model: CnnModel,
+                                      prop: PropertyExtractor) -> Tuple[np.ndarray, np.ndarray, List[str]]:
+
+        train_path = join(self.images_root_path, dataset_alias, self.target_all, "train")
+        test_path = join(self.images_root_path, dataset_alias, self.target_all, "test")
+
+        X_train, y_train, indexes_train, names_train = self._get_dataset_contents(model, train_path,
+                                                                                  prop.get_property_alias())
+        X_test, y_test, indexes_test, names_test = self._get_dataset_contents(model, test_path,
+                                                                              prop.get_property_alias())
+
+        features_current = np.vstack((X_train, X_test))
+        labels_current = np.hstack((y_train, y_test))
+
+        names_current = names_train + names_test
+
+        return features_current, labels_current, names_current
+
     def _classify_inter_dataset(self,
                                 dataset_origin: str,
                                 dataset_target: str,
                                 model: CnnModel,
                                 prop: PropertyExtractor):
 
-        train_path = join(self.images_root_path, dataset_origin, self.target_all, "train")
-        test_path = join(self.images_root_path, dataset_target, self.target_all, "test")
+        output_dir = join(self.inter_dataset_output,
+                          dataset_origin,
+                          dataset_target,
+                          self.target_all,
+                          prop.get_property_alias(),
+                          model.alias)
 
-        X_train, y_train, indexes_train, names_train = self._get_dataset_contents(model, train_path,
-                                                                                  prop.get_property_alias())
-        X_test, y_test, indexes_test, names_test = self._get_dataset_contents(model, test_path,
-                                                                                prop.get_property_alias())
+        if os.path.exists(output_dir):
+            print('Dataset %s for property %s with model %s already trained' % (dataset_origin, prop.get_property_alias(), model.alias))
+            return
+        # train_path = join(self.images_root_path, dataset_origin, self.target_all, "train")
+        # test_path = join(self.images_root_path, dataset_target, self.target_all, "test")
+
+        X_train, y_train, names_train = self._get_all_subsets_from_dataset(dataset_origin, model, prop)
+        X_test, y_test, names_test = self._get_all_subsets_from_dataset(dataset_target, model, prop)
+
 
         y_train = np_utils.to_categorical(y_train, 2)
         y_test = np_utils.to_categorical(y_test, 2)
@@ -70,19 +99,14 @@ class InterFinetuningClassifier(BaseFinetuner):
         train_data = gen.flow(X_train, y_train, shuffle=True, batch_size=self.BATCH_SIZE)
         test_data = gen.flow(X_test, y_test, shuffle=True, batch_size=self.BATCH_SIZE)
         #
-        finetuned_model, history, time_callback = self.train(train_data, test_data, model.__model, num_train_steps, num_valid_steps)
+        finetuned_model, history, time_callback = self.train(train_data, test_data, model.__model, num_train_steps,
+                                                             num_valid_steps)
 
         y_pred = self._predict(finetuned_model, X_test)
         results = self._evaluate_results(y_pred, y_test, names_test)
 
         print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
 
-        output_dir = join(self.inter_dataset_output,
-                          dataset_origin,
-                          dataset_target,
-                          self.target_all,
-                          prop.get_property_alias(),
-                          model.alias)
 
         self._save_artifacts(finetuned_model, history, output_dir, y_pred, results, time_callback)
 
