@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 class PropertyExtractor(ABC):
 
-    THRESHOLD_MISSING_FRAMES = 200
+    THRESHOLD_MISSING_FRAMES = 50
     """
     This class should be used as a base class for any property extractor. Please rely to other
     extractors (such as DepthExtractor, IlluminationExtractor, SaliencyExtractor) as a working

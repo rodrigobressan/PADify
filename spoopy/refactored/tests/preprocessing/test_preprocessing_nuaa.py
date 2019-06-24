@@ -117,7 +117,7 @@ class TestPreprocessingNuaa(unittest.TestCase):
 
         extractor.perform_extraction()
 
-        target_list = os.listdir(os.path.join(separated_path, 'cbsr'))
+        target_list = os.listdir(os.path.join(separated_path, 'nuaa'))
 
         expected_artifacts = ['X_train.npy',
                               'y_train.npy',
@@ -131,7 +131,7 @@ class TestPreprocessingNuaa(unittest.TestCase):
             for target in target_list:
                 for model in self.models:
                     path = os.path.join(self.output_features,
-                                        'cbsr',
+                                        'nuaa',
                                         target,
                                         prop.get_property_alias(),
                                         model.alias)
@@ -253,14 +253,18 @@ class TestPreprocessingNuaa(unittest.TestCase):
 
         metalearner_classifier._perform_meta_classification()
 
+    def separate_frames_finetuning(self):
+        self.processor.separate_for_intra_finetuning()
+
     def test_preprocessor(self):
         tasks = [
             # self.organize_videos_by_subset_and_label,
             # self.extract_frames_from_videos,
-            # self.extract_maps_from_frames,
+            self.extract_maps_from_frames,
             # self.align_maps,
             # self.separate_maps_by_pai,
-            self.analyze_extracted_data,
+            # self.analyze_extracted_data,
+            # self.separate_frames_finetuning
             # self.extract_features,
             # self.perform_intra_feature_classification,
             # self.perform_inter_feature_classification

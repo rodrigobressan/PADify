@@ -27,10 +27,14 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 class InterFinetuningClassifier(BaseFinetuner):
     def classify_inter_dataset(self):
         for origin, target, prop, model in self._list_inter_combinations(self.images_root_path):
-            self._classify_inter_dataset(dataset_origin=origin,
-                                         dataset_target=target,
-                                         model=model,
-                                         prop=prop)
+            try:
+                self._classify_inter_dataset(dataset_origin=origin,
+                                             dataset_target=target,
+                                             model=model,
+                                             prop=prop)
+            except Exception as e:
+                print('exception on origin %s target %s prop %s model %s' % (
+                origin, target, prop.get_property_alias(), model.alias))
 
     def _list_inter_combinations(self, path: str):
         # datasets = os.listdir(path)
@@ -75,14 +79,14 @@ class InterFinetuningClassifier(BaseFinetuner):
                           model.alias)
 
         if os.path.exists(output_dir):
-            print('Dataset %s for property %s with model %s already trained' % (dataset_origin, prop.get_property_alias(), model.alias))
+            print('Dataset %s for property %s with model %s already trained' % (
+            dataset_origin, prop.get_property_alias(), model.alias))
             return
         # train_path = join(self.images_root_path, dataset_origin, self.target_all, "train")
         # test_path = join(self.images_root_path, dataset_target, self.target_all, "test")
 
         X_train, y_train, names_train = self._get_all_subsets_from_dataset(dataset_origin, model, prop)
         X_test, y_test, names_test = self._get_all_subsets_from_dataset(dataset_target, model, prop)
-
 
         y_train = np_utils.to_categorical(y_train, 2)
         y_test = np_utils.to_categorical(y_test, 2)
@@ -99,14 +103,13 @@ class InterFinetuningClassifier(BaseFinetuner):
         train_data = gen.flow(X_train, y_train, shuffle=True, batch_size=self.BATCH_SIZE)
         test_data = gen.flow(X_test, y_test, shuffle=True, batch_size=self.BATCH_SIZE)
         #
-        finetuned_model, history, time_callback = self.train(train_data, test_data, model.__model, num_train_steps,
+        finetuned_model, history, time_callback = self.train(train_data, test_data, model.get_model(), num_train_steps,
                                                              num_valid_steps)
 
         y_pred = self._predict(finetuned_model, X_test)
         results = self._evaluate_results(y_pred, y_test, names_test)
 
         print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
-
 
         self._save_artifacts(finetuned_model, history, output_dir, y_pred, results, time_callback)
 

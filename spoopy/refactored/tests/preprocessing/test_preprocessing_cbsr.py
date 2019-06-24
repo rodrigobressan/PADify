@@ -1,3 +1,9 @@
+
+import os
+
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 import matplotlib
 
 from refactored.classification.finetuning.intra_finetuning_classifier import IntraFinetuningClassifier
@@ -8,7 +14,6 @@ import pathlib
 import time
 import unittest
 
-import os
 import shutil
 from os.path import exists, join
 
@@ -16,8 +21,6 @@ from refactored.classification.feature.inter_feature_classifier import InterBase
 from refactored.classification.finetuning.inter_finetuning_classifier import InterFinetuningClassifier
 from refactored.classification.metalearner.metalearner_classifier import MetalearnerClassifier
 
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 from refactored.classification.classifier import XGBoostClassifier
 from refactored.classification.feature.intra_feature_classifier import IntraBasePredictor
@@ -26,7 +29,7 @@ from refactored.preprocessing import common_preprocessing
 
 
 class TestPreprocessingCbsr(unittest.TestCase):
-    base_path_artifacts = '../artifacts_bkp'
+    base_path_artifacts = '/codes/bresan/remote/spoopy/spoopy/refactored/tests/artifacts_bkp'
     output_features = os.path.join(base_path_artifacts, 'features')
     output_classification = os.path.join(base_path_artifacts, 'classification')
     output_finetuning = os.path.join(base_path_artifacts, 'finetuning')
@@ -108,6 +111,7 @@ class TestPreprocessingCbsr(unittest.TestCase):
         #         self.assertTrue(exists(path))
 
     def separate_maps_by_pai(self):
+        # self.processor.organize_properties_by_pai()
         self.processor.organize_properties_by_pai()
 
         path_pai = self.processor.separated_pai_root
@@ -201,26 +205,7 @@ class TestPreprocessingCbsr(unittest.TestCase):
                         frames = len(os.listdir(prop_path))
                         print('%s %s %s %s %d' % (pai, subset, label, prop, frames))
 
-                        #
-                        # path_aligned = self.processor.aligned_root
-                        # aligned_frames = self.processor.handler.get_frames_properties(path_aligned)
-                        # frames_props = []
-                        # for frame, prop, label, subset in aligned_frames:
-                        #     name = '%s_%s_%s' % (frame, label, subset)
-                        #     frames_props.append(name)
-                        #
-                        # frames_props = set(frames_props)
-                        #
-                        # print('size props: %d' % len(frames_props))
-                        # diff = list(set(frames_extracted).symmetric_difference(frames_props))
-                        # print(len(diff))
-                        #
-                        # for missing in diff:
-                        #     print(missing)
 
-                        # pai_list = os.listdir(self.processor.separated_pai_root)
-                        # for pai in pai_list:
-                        #     print('pai %s' % pai)
 
     def extract_dicts_props(self, path_maps):
         extracted_maps = self.processor.handler.get_frames_properties(path_maps)
@@ -278,6 +263,10 @@ class TestPreprocessingCbsr(unittest.TestCase):
 
         finetuner.classify_intra_dataset()
 
+    def separate_frames_finetuning(self):
+        self.processor.separate_for_intra_finetuning()
+        self.processor.separate_for_inter_finetuning()
+
     def test_preprocessor(self):
         tasks = [
             # self.organize_videos_by_subset_and_label,
@@ -287,11 +276,12 @@ class TestPreprocessingCbsr(unittest.TestCase):
             # self.separate_maps_by_pai,
             # self.analyze_extracted_data,
             # self.extract_features,
+            # self.separate_frames_finetuning,
             # self.perform_intra_feature_classification,
-            # self.perform_inter_feature_classification
+            # self.perform_inter_feature_classification,
             # self.perform_metalearning_classification,
-            self.perform_inter_finetuning
-            # self.perform_intra_finetuning
+            # self.perform_inter_finetuning
+            self.perform_intra_finetuning
         ]
 
         for task in tasks:

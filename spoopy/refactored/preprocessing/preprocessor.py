@@ -18,12 +18,13 @@ class Preprocessor(ABC):
 
     PATH_ORIGINAL_VIDEOS = 'original_videos'
     PATH_SEPARATED_BY_PAI = 'separated_by_pai'
+    PATH_SEPARATED_BY_FINETUNING = 'separated_by_finetuning'
     PATH_SEPARATED_BY_SUBSET = 'separated_by_subset'
     PATH_EXTRACTED_FRAMES = 'extracted_frames'
     PATH_EXTRACTED_MAPS = 'extracted_maps'
     PATH_ALIGNED = 'aligned'
 
-    THRESHOLD_MISSING_FRAMES = 15
+    THRESHOLD_MISSING_FRAMES = 0
 
     def __init__(self,
                  artifacts_root: str,
@@ -36,6 +37,12 @@ class Preprocessor(ABC):
 
         self.videos_root = join(artifacts_root, self.PATH_ORIGINAL_VIDEOS, dataset_name)
         self.separated_pai_root = join(artifacts_root, self.PATH_SEPARATED_BY_PAI, dataset_name)
+        self.finetuning_base_path = join(artifacts_root, self.PATH_SEPARATED_BY_FINETUNING)
+
+        self.separated_finetuning_intra_root = join(artifacts_root, self.PATH_SEPARATED_BY_FINETUNING, 'intra',
+                                                    dataset_name)
+        self.separated_finetuning_inter_root = join(artifacts_root, self.PATH_SEPARATED_BY_FINETUNING, 'inter',
+                                                    dataset_name)
         self.separated_subset_root = join(artifacts_root, self.PATH_SEPARATED_BY_SUBSET, dataset_name)
         self.extracted_frames_root = join(artifacts_root, self.PATH_EXTRACTED_FRAMES, dataset_name)
         self.properties_root = join(artifacts_root, self.PATH_EXTRACTED_MAPS, dataset_name)
@@ -238,6 +245,92 @@ class Preprocessor(ABC):
                     # When we try to remove the frame that doesn't exist, we will receive a FileNotFound Error
                     print('Tried to remove %s but it doesnt exist' % frame_path)
 
+    def separate_for_intra_finetuning(self) -> None:
+        """
+        Used to separate the files for finetuning in the following structure:
+            Dataset [CBSR, RA, Rose]
+                Property [Depth, Original, Illumination]
+                    Subset [Train, Test, Valid]
+                        Label [Real, Fake]
+                            Frame1.jpg
+                            Frame2.jpg
+                            ...
+
+        :return:
+        """
+        path_input = self.aligned_root
+
+        for frame_name, prop, label, subset in self.handler.get_frames_properties(path_input):
+            original_path = join(path_input, subset, label, prop, frame_name)
+            all_output_path = join(self.separated_finetuning_root, 'intra', prop, subset, label)
+
+            self.copy_if_not_exists(original_path, all_output_path, frame_name)
+
+    def separate_for_intra_finetuning(self) -> None:
+        """
+        Used to separate the files for finetuning in the following structure:
+            Dataset [CBSR, RA, Rose]
+                Property [Depth, Original, Illumination]
+                    Subset [Train, Test, Valid]
+                        Label [Real, Fake]
+                            Frame1.jpg
+                            Frame2.jpg
+                            ...
+
+        :return:
+        """
+        path_input = self.aligned_root
+
+        for frame_name, prop, label, subset in self.handler.get_frames_properties(path_input):
+            original_path = join(path_input, subset, label, prop, frame_name)
+            all_output_path = join(self.separated_finetuning_intra_root, prop, subset, label)
+
+            self.copy_if_not_exists(original_path, all_output_path, frame_name)
+
+    def separate_for_inter_finetuning(self) -> None:
+
+        def __move_dataset_into_path(dataset_name: str, output_path: str) -> None:
+            dataset_train = os.path.join(self.finetuning_base_path, 'intra', dataset_name,
+                                         prop.get_property_alias(), 'train')
+
+            dataset_test = os.path.join(self.finetuning_base_path, 'intra', dataset_name,
+                                        prop.get_property_alias(), 'test')
+
+            __move_all_frames_from_set(dataset_train, output_path, dataset_name, 'train')
+            __move_all_frames_from_set(dataset_test, output_path, dataset_name, 'test')
+
+        def __move_all_frames_from_set(path_set: str, output_path: str, ds_name: str, ds_set: str):
+            """
+            Used to move all frames from a given set (train, test, valid) into a new dir
+            :param path_set: the path where the labels are located
+            :return:
+            """
+            labels = os.listdir(path_set)
+
+            for label in labels:
+                path_label = join(path_set, label)
+                for frame in os.listdir(path_label):
+                    path_frame = join(path_label, frame)
+                    output = join(output_path, label)
+                    self.copy_if_not_exists(path_frame, output, frame)
+
+        # gotta have extracted first the intra..
+        datasets = os.listdir(join(self.finetuning_base_path, 'intra'))
+
+        for prop in self.properties:
+            for origin_dataset in datasets:
+                for target_dataset in [d for d in datasets if d != origin_dataset]:
+                    output_path = os.path.join(self.finetuning_base_path,
+                                               'inter',
+                                               origin_dataset, target_dataset,
+                                               prop.get_property_alias())
+
+                    if not os.path.exists(output_path):
+                        os.makedirs(output_path, exist_ok=True)
+
+                    __move_dataset_into_path(origin_dataset, join(output_path, 'train'))
+                    __move_dataset_into_path(target_dataset, join(output_path, 'test'))
+
     def organize_properties_by_pai(self) -> None:
         """
         Used to organise the properties by their PAI. The output of this process will
@@ -263,20 +356,23 @@ class Preprocessor(ABC):
                             Frame2.jpg
 
         """
-        for frame_name, prop, label, subset in self.handler.get_frames_properties(self.aligned_root):
 
-            original_path = join(self.aligned_root, subset, label, prop, frame_name)
+        path_input = self.aligned_root
 
-            # # move all frames into 'all' folder
+        for frame_name, prop, label, subset in self.handler.get_frames_properties(path_input):
+
+            original_path = join(path_input, subset, label, prop, frame_name)
             all_output_path = join(self.separated_pai_root, self.all_attacks_alias, subset, label, prop)
+
             self.copy_if_not_exists(original_path, all_output_path, frame_name)
 
             if label == self.default_attack_label:
                 attack_alias = self.get_attack_alias_from_frame_name(frame_name)
 
                 # format: /root/attack_alias/subset/label/property
-                print('attack alias name:', frame_name)
+                # print('attack alias name:', frame_name)
                 output_path = join(self.separated_pai_root, attack_alias, subset, label, prop)
+
                 self.copy_if_not_exists(original_path, output_path, frame_name)
             else:
                 # make a copy into each of the attack folders

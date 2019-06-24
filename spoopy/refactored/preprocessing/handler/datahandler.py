@@ -34,6 +34,7 @@ class DataHandler(ABC):
     def get_frames_properties(self, path: str) -> [str, str, str, str]:
         pass
 
+
     @abstractmethod
     def list_videos(self, path: str) -> Tuple[str, str, str]:
         pass
@@ -92,6 +93,7 @@ class DiskHandler(DataHandler):
             # Label of the category (Real, Attack)
             for label in labels_list:
                 yield [label, subset]
+
 
     def get_frames_structured(self, base_path: str) -> [str, str, str]:
         """

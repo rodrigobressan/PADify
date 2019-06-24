@@ -1,3 +1,8 @@
+import os
+
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 import matplotlib
 from keras.utils import multi_gpu_model
 from os.path import join
@@ -27,6 +32,9 @@ from tools.file_utils import file_helper
 import pickle
 
 
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 class BaseFinetuner():
     PRED_NAME = "y_pred.npy"
     PROBA_NAME = "y_pred_proba.npy"
@@ -43,7 +51,7 @@ class BaseFinetuner():
     INTER_NAME = "inter"
     META_NAME = "meta"
 
-    BATCH_SIZE = 32
+    BATCH_SIZE = 16
 
     exts = ('*.jpg', '*.png')
     frame_delimiter = '_frame_'
@@ -75,7 +83,7 @@ class BaseFinetuner():
 
         # models = [resnet, vgg, etc]
         for model in self.models:
-            for prop in [OriginalExtractor(), IlluminationExtractor()]:
+            for prop in self.properties:
                 yield [model, prop]
 
     def _save_artifacts(self, model: CnnModel,
@@ -138,13 +146,13 @@ class BaseFinetuner():
         classification_layer = Dense(len(classes), activation="softmax")(last)
 
         ft_model = Model(model.input, classification_layer)
-        ft_model = multi_gpu_model(ft_model, gpus=2)
-        ft_model.compile(optimizer=Adam(lr=0.00001), loss='binary_crossentropy', metrics=['accuracy'])
+        # ft_model = multi_gpu_model(ft_model, gpus=3)
+        ft_model.compile(optimizer=Adam(lr=0.0001), loss='binary_crossentropy', metrics=['accuracy'])
 
         time_callback = TimeHistory()
 
-        reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
-                                      patience=5, min_lr=0.000001)
+        # reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
+        #                               patience=5, min_lr=0.00001)
 
         tensorboard = TensorBoard(log_dir='/codes/bresan/remote/spoopy/spoopy/refactored/classification/finetuning',
                                   histogram_freq=0,
@@ -153,7 +161,7 @@ class BaseFinetuner():
         history = ft_model.fit_generator(train_batches,
                                          steps_per_epoch=num_train_steps,
                                          epochs=50,
-                                         callbacks=[time_callback, reduce_lr],
+                                         callbacks=[time_callback],
                                          validation_data=test_batches,
                                          validation_steps=num_test_steps)
 

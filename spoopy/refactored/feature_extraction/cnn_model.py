@@ -1,9 +1,8 @@
 from typing import Tuple
 
 from abc import ABC
-from keras.applications import ResNet50, InceptionV3, MobileNet, NASNetMobile, NASNetLarge, VGG16, VGG19, Xception, \
-    InceptionResNetV2, MobileNetV2
-from keras_applications.densenet import DenseNet121
+from keras.applications import ResNet50
+import tensorflow as tf
 
 
 class CnnModel(ABC):
@@ -24,7 +23,8 @@ class CnnModel(ABC):
         self.input_shape = input_shape
 
     def get_model(self):
-        return self.__model()
+        with tf.device('/cpu:0'):
+            return self.__model()
 
     def predict(self, X):
         """
@@ -39,53 +39,53 @@ class CnnModel(ABC):
 class ResNet50Model(CnnModel):
     def __init__(self):
         super().__init__(ResNet50, "resnet50", [3, 224, 224])
-
-
-class DenseNetModel(CnnModel):
-    def __init__(self):
-        super().__init__(DenseNet121, "densenet121")
-
-
-class InceptionV3Model(CnnModel):
-    def __init__(self):
-        super().__init__(InceptionV3, "inceptionv3")
-
-
-class MobileNetModel(CnnModel):
-    def __init__(self):
-        super().__init__(MobileNet, "mobilenet")
-
-
-class MobileNetV2Model(CnnModel):
-    def __init__(self):
-        super().__init__(MobileNetV2, "mobilenetv2")
-
-
-class NasNetMobileModel(CnnModel):
-    def __init__(self):
-        super().__init__(NASNetMobile, "nasnetmobile")
-
-
-class NasNetLargeModel(CnnModel):
-    def __init__(self):
-        super().__init__(NASNetLarge, "nasnetlarge")
-
-
-class Vgg16Model(CnnModel):
-    def __init__(self):
-        super().__init__(VGG16, "vgg16")
-
-
-class Vgg19Model(CnnModel):
-    def __init__(self):
-        super().__init__(VGG19, "vgg19")
-
-
-class XceptionModel(CnnModel):
-    def __init__(self):
-        super().__init__(Xception, "xception")
-
-
-class InceptionResnetV2Model(CnnModel):
-    def __init__(self):
-        super().__init__(InceptionResNetV2, "inceptionresnetv2")
+#
+#
+# class DenseNetModel(CnnModel):
+#     def __init__(self):
+#         super().__init__(DenseNet121, "densenet121")
+#
+#
+# class InceptionV3Model(CnnModel):
+#     def __init__(self):
+#         super().__init__(InceptionV3, "inceptionv3")
+#
+#
+# class MobileNetModel(CnnModel):
+#     def __init__(self):
+#         super().__init__(MobileNet, "mobilenet")
+#
+#
+# class MobileNetV2Model(CnnModel):
+#     def __init__(self):
+#         super().__init__(MobileNetV2, "mobilenetv2")
+#
+#
+# class NasNetMobileModel(CnnModel):
+#     def __init__(self):
+#         super().__init__(NASNetMobile, "nasnetmobile")
+#
+#
+# class NasNetLargeModel(CnnModel):
+#     def __init__(self):
+#         super().__init__(NASNetLarge, "nasnetlarge")
+#
+#
+# class Vgg16Model(CnnModel):
+#     def __init__(self):
+#         super().__init__(VGG16, "vgg16")
+#
+#
+# class Vgg19Model(CnnModel):
+#     def __init__(self):
+#         super().__init__(VGG19, "vgg19")
+#
+#
+# class XceptionModel(CnnModel):
+#     def __init__(self):
+#         super().__init__(Xception, "xception")
+#
+#
+# class InceptionResnetV2Model(CnnModel):
+#     def __init__(self):
+#         super().__init__(InceptionResNetV2, "inceptionresnetv2")

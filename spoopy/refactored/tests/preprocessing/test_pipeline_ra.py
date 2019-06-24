@@ -283,14 +283,19 @@ class TestIntegrationPipeline(unittest.TestCase):
                 frames_maps[prop].append(name)
         return frames_maps
 
+
+    def separate_frames_finetuning(self):
+        self.processor.separate_for_intra_finetuning()
+
     def test_preprocessor(self):
         tasks = [
             # self.organize_videos_by_subset_and_label,
             # self.extract_frames_from_videos,
-            # self.extract_maps_from_frames,
+            self.extract_maps_from_frames,
             # self.align_maps,
             # self.separate_maps_by_pai,
             # self.analyze_extracted_data,
+            # self.separate_frames_finetuning
             # self.extract_features,
             # self.perform_intra_feature_classification,
             # self.perform_inter_feature_classification

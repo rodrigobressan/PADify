@@ -46,7 +46,7 @@ def get_frames_from_folder(folder):
     :return: the array containing all the frames in the folder
     """
     if os.path.exists(folder):
-        return [img for img in listdir(folder) if (img.endswith(DEFAULT_FRAME_EXTENSION) or img.endswith('.png'))]
+        return [img for img in listdir(folder) if (img.endswith(DEFAULT_FRAME_EXTENSION) or img.endswith('.png') or img.endswith('.bmp'))]
 
     return []
 

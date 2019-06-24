@@ -1,3 +1,9 @@
+import os
+from keras.applications import MobileNetV2
+
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 import matplotlib
 from keras.utils import np_utils
 
@@ -10,7 +16,7 @@ import keras
 
 import numpy as np
 import os
-from keras_applications.imagenet_utils import preprocess_input
+from keras.applications.imagenet_utils import preprocess_input
 from keras_preprocessing import image
 from os.path import join
 
@@ -23,6 +29,9 @@ from PIL import ImageFile
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 
 class IntraFinetuningClassifier(BaseFinetuner):
     def classify_intra_dataset(self):
@@ -33,7 +42,7 @@ class IntraFinetuningClassifier(BaseFinetuner):
 
     def _list_combinations(self, path: str):
         # datasets = os.listdir(path)
-        datasets = ["cbsr", "ra"]
+        datasets = ["cbsr", "ra", "nuaa"]
         for dataset_origin in datasets:
             for prop, model in self._list_variations():
                 yield [dataset_origin, model, prop]
@@ -50,7 +59,8 @@ class IntraFinetuningClassifier(BaseFinetuner):
                           model.alias)
 
         if os.path.exists(output_dir):
-            print('Dataset %s for property %s with model %s already trained' % (dataset_origin, prop.get_property_alias(), model.alias))
+            print('Dataset %s for property %s with model %s already trained' % (
+            dataset_origin, prop.get_property_alias(), model.alias))
             return
 
         train_path = join(self.images_root_path, dataset_origin, self.target_all, "train")
@@ -60,11 +70,14 @@ class IntraFinetuningClassifier(BaseFinetuner):
         print('test_path: ', test_path)
         print('prop: ', prop.get_property_alias())
         print('model: ', model.alias)
+        os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+        print('GPU: ', os.environ["CUDA_VISIBLE_DEVICES"])
 
         X_train, y_train, indexes_train, names_train = self._get_dataset_contents(model, train_path,
                                                                                   prop.get_property_alias())
         X_test, y_test, indexes_test, names_test = self._get_dataset_contents(model, test_path,
-                                                                                prop.get_property_alias())
+                                                                              prop.get_property_alias())
 
         y_train = np_utils.to_categorical(y_train, 2)
         y_test = np_utils.to_categorical(y_test, 2)
@@ -81,14 +94,14 @@ class IntraFinetuningClassifier(BaseFinetuner):
         train_data = gen.flow(X_train, y_train, shuffle=True, batch_size=self.BATCH_SIZE)
         test_data = gen.flow(X_test, y_test, shuffle=True, batch_size=self.BATCH_SIZE)
         #
-        finetuned_model, history, time_callback = self.train(train_data, test_data, model.get_model(), num_train_steps, num_valid_steps)
+        model = MobileNetV2(weights=None, input_shape=(224, 224, 3), include_top=False, pooling='avg')
+        finetuned_model, history, time_callback = self.train(train_data, test_data, model.get_model(), num_train_steps,
+                                                             num_valid_steps)
 
         y_pred = self._predict(finetuned_model, X_test)
         results = self._evaluate_results(y_pred, y_test, names_test)
 
         print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
-
-
 
         self._save_artifacts(finetuned_model, history, output_dir, y_pred, results, time_callback)
 

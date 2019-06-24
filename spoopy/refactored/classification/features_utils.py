@@ -19,6 +19,35 @@ def load_features(path: str, subset: str) -> np.ndarray:
     return np.load(os.path.join(path, file_name))
 
 
+def load_labels(path: str, subset: str) -> np.ndarray:
+    """
+    Used to load a given set of labels from a specified subset
+    :param path: the path where the labels are located
+    :param subset: their subset (train or test)
+    :return: a np.ndarray containing the labels
+    """
+    if subset == 'train':
+        file_name = 'y_train.npy'
+    elif subset == 'test':
+        file_name = 'y_test.npy'
+
+    return np.load(os.path.join(path, file_name))
+
+
+
+
+def load_names(path: str, subset: str) -> np.ndarray:
+    """
+    Used to load a given set of names from a specified subset
+    :param path: the path where the names are located
+    :param subset: their subset (train or test)
+    :return: a np.ndarray containing the names
+    """
+
+    names_path = os.path.join(path, 'samples_%s.txt' % subset)
+    return get_file_names(names_path)
+
+
 def concatenate_features(path: str):
     train_features_path = os.path.join(path, 'X_train.npy')
     test_features_path = os.path.join(path, 'X_test.npy')

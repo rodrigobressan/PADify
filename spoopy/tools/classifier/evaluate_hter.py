@@ -4,7 +4,7 @@ import sys
 
 import os
 from statistics import mode
-
+import numpy as np
 from pandas import *
 
 from tools.file_utils import file_helper
@@ -42,7 +42,8 @@ def analyze_results(dict_results):
     count_fake = 0
     for result in dict_results:
         try:
-            mode_predictions = mode(dict_results[result][0])
+            # mode_predictions = mode(dict_results[result][0])
+            mode_predictions = dict_results[result][0][0]
             truth = dict_results[result][1][0]
 
             if truth == 0:  # fake/attack
@@ -155,8 +156,13 @@ def evaluate_all_datasets():
 
 
 if __name__ == '__main__':
+    names, y_pred, y_test = load_file_info("generated_fastai")
+    y_pred = np.argmax(y_pred, 1)
+
+    hter, apcer, bpcer = evaluate_with_values(y_pred, y_test, names)
+    print('done')
     # hter, apcer, bpcer = evaluate_predictions('/Users/rodrigobresan/Documents/dev/github/anti_spoofing/spoopy/spoopy/static/evaluate/test_cbsr_ra_illum_cross_train')
     # print(hter)
     # print(evaluate_predictions('/Users/rodrigobresan/Documents/dev/github/anti_spoofing/spoopy/spoopy/static/evaluate/intra/cbsr/all/illumination/features/resnet'))
-    evaluate_all_datasets_combination()
+    # evaluate_all_datasets_combination()
     # evaluate_all_datasets_combination()

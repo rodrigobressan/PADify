@@ -3,6 +3,7 @@ from refactored.preprocessing.processor.cbsr.cbsr_processor import CbsrProcessor
 from refactored.preprocessing.processor.deep_fakes.deep_fakes_processor import DeepFakesProcessor
 from refactored.preprocessing.processor.nuaa.nuaa_processor import NuaaProcessor
 from refactored.preprocessing.processor.replay_attack.ra_processor import RaProcessor
+from refactored.preprocessing.property.noise_extractor import NoiseExtractor
 from refactored.preprocessing.property.depth_extractor import DepthExtractor
 from refactored.preprocessing.property.illumination_extractor import IlluminationExtractor
 from refactored.preprocessing.property.original_extractor import OriginalExtractor
@@ -15,12 +16,14 @@ def get_properties():
     saliency_extractor = SaliencyExtractor()
     illumination_extractor = IlluminationExtractor()
     depth_extractor = DepthExtractor()
+    noise_extractor = NoiseExtractor()
     original_extractor = OriginalExtractor()
 
     properties.append(depth_extractor)
     properties.append(original_extractor)
     properties.append(saliency_extractor)
     properties.append(illumination_extractor)
+    # properties.append(noise_extractor)
 
     return properties
 
@@ -65,6 +68,6 @@ def make_deep_fakes_processor(artifacts_root):
 
 def make_nuaa_processor(artifacts_root):
     processor = NuaaProcessor(artifacts_root=artifacts_root,
-                                   dataset_name='nuaa',
-                                   properties=get_properties())
+                              dataset_name='nuaa',
+                              properties=get_properties())
     return processor

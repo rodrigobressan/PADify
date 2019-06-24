@@ -1,15 +1,16 @@
 import os
 
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+#
 import glob
 import json
 from typing import List, Tuple
 
 import numpy as np
 import os
-from keras_applications.imagenet_utils import preprocess_input
+from keras.applications.imagenet_utils import preprocess_input
+# from keras_applications.imagenet_utils import preprocess_input
 from keras_preprocessing import image
 from os.path import join
 

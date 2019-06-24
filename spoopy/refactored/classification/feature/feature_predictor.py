@@ -16,11 +16,14 @@ from tools.file_utils import file_helper
 class BasePredictor:
     PRED_NAME = "y_pred.npy"
     PROBA_NAME = "y_pred_proba.npy"
+    TRUE_NAME = "y_true.npy"
+
     MODEL_NAME = "model.sav"
     RESULTS_NAME = "results.txt"
 
     INTRA_NAME = "intra"
     INTER_NAME = "inter"
+    FINAL_NAME = "final"
     META_NAME = "meta"
 
     def __init__(self,
@@ -61,6 +64,7 @@ class BasePredictor:
 
     def _save_artifacts(self, classifier: BaseClassifier,
                         output_dir: str,
+                        y_true: np.ndarray,
                         y_pred: np.ndarray,
                         y_pred_proba: np.ndarray,
                         results: np.ndarray):
@@ -68,6 +72,7 @@ class BasePredictor:
         file_helper.guarantee_path_preconditions(output_dir)
 
         # save preds
+        np.save(os.path.join(output_dir, self.TRUE_NAME), y_true)
         np.save(os.path.join(output_dir, self.PRED_NAME), y_pred)
         np.save(os.path.join(output_dir, self.PROBA_NAME), y_pred_proba)
 
@@ -78,7 +83,7 @@ class BasePredictor:
 
         # save HTER, APCER and BPCER
         results_path = os.path.join(output_dir, self.RESULTS_NAME)
-        result = '%d\n%d\n%d' % (results[0], results[1], results[2])
+        result = '%.5f\n%.5f\n%.5f' % (results[0], results[1], results[2])
 
         save_txt(results_path, result)
 

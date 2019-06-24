@@ -163,8 +163,8 @@ def init_tensorflow(checkpoint_path, params):
 
 
 def main():
-    apply_depth_inference_on_folder('/Users/rodrigobresan/Documents/dev/github/anti_spoofing/spoopy/tools/depth/images',
-                                    '/Users/rodrigobresan/Documents/dev/github/anti_spoofing/spoopy/tools/depth/output')
+    apply_depth_inference_on_folder('/codes/bresan/remote/spoopy/spoopy/refactored/tests/artifacts_bkp/extracted_frames/img_sibgrapi/train/attack',
+                                    '/codes/bresan/remote/spoopy/spoopy/refactored/tests/artifacts_bkp/extracted_maps/img_sibgrapi/train/attack/depth')
     print("monodepth_simple main")
 
 

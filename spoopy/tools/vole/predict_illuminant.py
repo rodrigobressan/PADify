@@ -23,7 +23,7 @@ dirname = os.path.dirname(__file__)
 VOLE_PATH = os.path.join(dirname, 'source/build/vole')
 CONFIG_PATH = os.path.join(dirname, 'source/config.txt')
 
-THRESHOLD_MISSING_FRAMES = 200
+THRESHOLD_MISSING_FRAMES = 0
 
 def get_frames_not_processed(all_frames_path, output_path):
     all_images = file_helper.get_frames_from_folder(all_frames_path)

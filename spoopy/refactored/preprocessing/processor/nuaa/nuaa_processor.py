@@ -51,11 +51,12 @@ class NuaaProcessor(Preprocessor):
         real_path = join(root_path, 'ClientRaw')
         fake_path = join(root_path, 'ImposterRaw')
 
-        self.move_files_into_set(output_path, real_path, train_real_indexes, 'train', 'real')
-        self.move_files_into_set(output_path, real_path, test_real_indexes, 'test', 'real')
 
-        self.move_files_into_set(output_path, fake_path, train_fake_indexes, 'train', 'fake')
-        self.move_files_into_set(output_path, fake_path, test_fake_indexes, 'test', 'fake')
+        self.move_files_into_set(output_path, real_path, train_real_indexes, 'train', self.default_real_label)
+        self.move_files_into_set(output_path, real_path, test_real_indexes, 'test', self.default_real_label)
+
+        self.move_files_into_set(output_path, fake_path, train_fake_indexes, 'train', self.default_attack_label)
+        self.move_files_into_set(output_path, fake_path, test_fake_indexes, 'test', self.default_attack_label)
 
     def move_files_into_set(self, output_path: str, origin_path: str, indexes_path: str, set, label: str):
         print(set + ' ' + label)

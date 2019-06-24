@@ -60,4 +60,4 @@ class InterBasePredictor(BasePredictor):
                           model.alias,
                           classifier.get_alias())
 
-        self._save_artifacts(classifier, output_dir, y_pred, y_proba, results)
+        self._save_artifacts(classifier, output_dir, y_test, y_pred, y_proba, results)
