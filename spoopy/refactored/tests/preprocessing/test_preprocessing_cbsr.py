@@ -271,7 +271,7 @@ class TestPreprocessingCbsr(unittest.TestCase):
         tasks = [
             # self.organize_videos_by_subset_and_label,
             # self.extract_frames_from_videos,
-            # self.extract_maps_from_frames,
+            self.extract_maps_from_frames,
             # self.align_maps,
             # self.separate_maps_by_pai,
             # self.analyze_extracted_data,
@@ -281,7 +281,7 @@ class TestPreprocessingCbsr(unittest.TestCase):
             # self.perform_inter_feature_classification,
             # self.perform_metalearning_classification,
             # self.perform_inter_finetuning
-            self.perform_intra_finetuning
+            # self.perform_intra_finetuning
         ]
 
         for task in tasks:

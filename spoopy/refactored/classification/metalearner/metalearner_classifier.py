@@ -1,6 +1,7 @@
+import pickle
+
 import numpy as np
 import os
-import pickle
 from os.path import join, exists
 
 from refactored.classification import features_utils
@@ -99,7 +100,6 @@ class MetalearnerClassifier(BasePredictor):
         probas = np.reshape(probas[:, 0], (probas.shape[0], -1))
         return probas
 
-
     def __load_test_probas_intra(self,
                                  dataset_origin: str,
                                  property_alias: str,
@@ -146,6 +146,29 @@ class MetalearnerClassifier(BasePredictor):
         probas = np.reshape(probas[:, 0], (probas.shape[0], -1))
         return probas
 
+    def __load_test_probas(self,
+                            dataset_name: str,
+                            property_alias: str,
+                            model: CnnModel,
+                            classifier: BaseClassifier,
+                            protocol: str) -> np.ndarray:
+        """
+        Used to load the probabilities predictions previously generated from the first classifier
+        :param dataset_name: the dataset we're looking to load the probabilities
+        :param property_alias: the property (depth, illum, saliency, etc) we are loading
+        :param model: the model (ResNet50, VGG, etc)
+        :param classifier: used classifier (SVC, XGB, SVM, CNN, etc)
+        :param protocol: protocol used (inter or intra)
+        :return:
+        """
+        path_probas = join(self.meta_dataset_output, protocol, "test", "features", dataset_name, property_alias,
+                           model.alias,
+                           classifier.get_alias(), 'y_pred_proba.npy')
+
+        probas = np.load(path_probas)
+        probas = np.reshape(probas[:, 0], (probas.shape[0], -1))
+        return probas
+
     def __load_test_labels_inter(self, dataset_origin: str, dataset_target: str, property_alias: str, model: CnnModel,
                                  classifier: BaseClassifier) -> np.ndarray:
 
@@ -171,6 +194,15 @@ class MetalearnerClassifier(BasePredictor):
                             classifier: BaseClassifier, protocol: str) -> np.ndarray:
 
         path_labels = join(self.meta_dataset_output, protocol, "train", "features", dataset_name, property_alias,
+                           model.alias,
+                           classifier.get_alias(), 'labels.npy')
+
+        return np.load(path_labels)
+
+    def __load_test_labels(self, dataset_name: str, property_alias: str, model: CnnModel,
+                            classifier: BaseClassifier, protocol: str) -> np.ndarray:
+
+        path_labels = join(self.meta_dataset_output, protocol, "test", "features", dataset_name, property_alias,
                            model.alias,
                            classifier.get_alias(), 'labels.npy')
 
@@ -231,6 +263,16 @@ class MetalearnerClassifier(BasePredictor):
             for model in self.models:
                 base_path = join(self.features_root_path, dataset, self.target_all)
                 # [Depth, Illum, Saliency]
+
+                prop_list_train = []
+                prop_list_test = []
+
+                label_list_train = []
+                label_list_test = []
+
+                names_list_train = []
+                names_list_test = []
+
                 for prop in self.properties:
                     property_path = join(base_path, prop.get_property_alias(), model.alias)
                     features_train = features_utils.load_features(property_path, 'train')
@@ -252,32 +294,49 @@ class MetalearnerClassifier(BasePredictor):
                                           model.alias,
                                           classifier.get_alias())
 
+                        prop_list_train.append(features_train)
+                        prop_list_test.append(features_test)
 
+                        label_list_train.append(labels_train)
+                        label_list_test.append(labels_test)
 
-                        np.save(os.path.join(output_dir, 'features_train.npy'), features_train)
-                        np.save(os.path.join(output_dir, 'features_test.npy'), features_test)
+                        names_list_train.append(names_train)
+                        names_list_test.append(names_test)
 
-                        np.save(os.path.join(output_dir, 'labels_train.npy'), labels_train)
-                        np.save(os.path.join(output_dir, 'labels_test.npy'), labels_test)
-
-                        np.save(os.path.join(output_dir, 'names_train.npy'), names_train)
-                        np.save(os.path.join(output_dir, 'names_test.npy'), names_test)
+                        continue
 
                         if exists(output_dir):
                             print('Already generated, skipping.')
                             continue
+                        #
+                        # y_pred, y_proba = self._fit_and_predict(classifier, features_train, labels_train,
+                        #                                         features_train)
+                        #
+                        # results = self._evaluate_results(y_pred, labels_train, names_train)
+                        #
+                        # print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
+                        #
+                        # self._save_artifacts(classifier, output_dir, labels_train, y_pred, y_proba, results)
+                        #
+                        # save_txt(join(output_dir, 'names.txt'), names_train)
+                        # np.save(join(output_dir, 'labels.npy'), labels_train)
 
-                        y_pred, y_proba = self._fit_and_predict(classifier, features_train, labels_train,
-                                                                features_train)
+                output_dir = join(self.meta_dataset_output,
+                                  self.INTRA_NAME,
+                                  "train",
+                                  "features",
+                                  "saved_features")
 
-                        results = self._evaluate_results(y_pred, labels_train, names_train)
+                os.makedirs(output_dir)
 
-                        print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
+                np.save(join(output_dir, 'X_train.npy'), np.asarray(prop_list_train))
+                np.save(join(output_dir, 'X_test.npy'), np.asarray(prop_list_test))
 
-                        self._save_artifacts(classifier, output_dir, labels_train, y_pred, y_proba, results)
+                np.save(join(output_dir, 'y_train.npy'), np.asarray(label_list_train))
+                np.save(join(output_dir, 'y_test.npy'), np.asarray(label_list_test))
 
-                        save_txt(join(output_dir, 'names.txt'), names_train)
-                        np.save(join(output_dir, 'labels.npy'), labels_train)
+                np.save(join(output_dir, 'names_train.npy'), np.asarray(names_list_train))
+                np.save(join(output_dir, 'names_test.npy'), np.asarray(names_list_test))
 
     def _train_intra_probas_classifier(self) -> None:
         """
@@ -294,17 +353,33 @@ class MetalearnerClassifier(BasePredictor):
                 for model in self.models:
                     # TODO change to iterate properties
 
-                    probas_original = self.__load_train_probas(dataset, "original", model, classifier, self.INTRA_NAME)
-                    probas_depth = self.__load_train_probas(dataset, "depth", model, classifier, self.INTRA_NAME)
-                    probas_illumination = self.__load_train_probas(dataset, "illumination", model, classifier,
+                    probas_original_train = self.__load_train_probas(dataset, "original", model, classifier,
+                                                                     self.INTRA_NAME)
+                    probas_depth_train = self.__load_train_probas(dataset, "depth", model, classifier, self.INTRA_NAME)
+                    probas_illumination_train = self.__load_train_probas(dataset, "illumination", model, classifier,
+                                                                         self.INTRA_NAME)
+                    probas_saliency_train = self.__load_train_probas(dataset, "saliency", model, classifier,
                                                                    self.INTRA_NAME)
-                    probas_saliency = self.__load_train_probas(dataset, "saliency", model, classifier, self.INTRA_NAME)
 
-                    stacked_probas = np.stack((probas_depth, probas_illumination, probas_saliency, probas_original),
-                                              axis=2)
+                    probas_original_test = self.__load_test_probas(dataset, "original", model, classifier,
+                                                                     self.INTRA_NAME)
+                    probas_depth_test = self.__load_test_probas(dataset, "depth", model, classifier, self.INTRA_NAME)
+                    probas_illumination_test = self.__load_test_probas(dataset, "illumination", model, classifier,
+                                                                         self.INTRA_NAME)
+                    probas_saliency_test = self.__load_test_probas(dataset, "saliency", model, classifier,
+                                                                       self.INTRA_NAME)
 
-                    labels_original = self.__load_train_labels(dataset, "original", model, classifier, self.INTRA_NAME)
-                    fitted_classifier = self._fit(classifier, stacked_probas, labels_original)
+
+                    stacked_probas_train = np.stack(
+                        (probas_depth_train, probas_illumination_train, probas_saliency_train, probas_original_train),
+                        axis=2)
+
+                    stacked_probas_test = np.stack(
+                        (probas_depth_test, probas_illumination_test, probas_saliency_test, probas_original_test),
+                        axis=2)
+
+                    labels_original_train = self.__load_train_labels(dataset, "original", model, classifier, self.INTRA_NAME)
+                    labels_original_test = self.__load_test_labels(dataset, "original", model, classifier, self.INTRA_NAME)
 
                     output_dir = join(self.meta_dataset_output,
                                       self.INTRA_NAME,
@@ -314,7 +389,13 @@ class MetalearnerClassifier(BasePredictor):
                                       model.alias,
                                       classifier.get_alias())
 
-                    np.save(os.path.join(output_dir, 'stacked.npy'), stacked_probas)
+                    np.save(os.path.join(output_dir, 'train_probas_stacked.npy'), stacked_probas_train)
+                    np.save(os.path.join(output_dir, 'test_probas_stacked.npy'), stacked_probas_test)
+
+                    np.save(os.path.join(output_dir, 'train_labels_stacked.npy'), labels_original_train)
+                    np.save(os.path.join(output_dir, 'test_labels_stacked.npy'), labels_original_test)
+
+                    fitted_classifier = self._fit(classifier, stacked_probas_train, labels_original_train)
 
                     file_helper.guarantee_path_preconditions(output_dir)
                     model_path = os.path.join(output_dir, self.MODEL_NAME)
@@ -416,7 +497,8 @@ class MetalearnerClassifier(BasePredictor):
                         y_pred, y_pred_proba = self._predict(model_fitted, features_concatenated)
 
                         results = self._evaluate_results(y_pred, labels_concatenated, names_concatenated)
-                        print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
+                        print('HTER: %f\nAPCER: %f\nBPCER: %f\nACC: %f' % (
+                        results[0], results[1], results[2], results[3]))
 
                         output_dir = join(self.meta_dataset_output,
                                           self.INTRA_NAME,
@@ -465,7 +547,8 @@ class MetalearnerClassifier(BasePredictor):
                         stacked_probas = np.stack((probas_depth, probas_illumination, probas_saliency, probas_original),
                                                   axis=2)
 
-                        labels = self.__load_test_labels_inter(dataset_origin, dataset_target, "original", model, classifier)
+                        labels = self.__load_test_labels_inter(dataset_origin, dataset_target, "original", model,
+                                                               classifier)
                         names = load_txt(
                             join(base_path, "original", model.alias, classifier.get_alias(), 'names.txt'))
 
@@ -511,13 +594,13 @@ class MetalearnerClassifier(BasePredictor):
                 for model in self.models:
                     base_path = join(self.meta_dataset_output, self.INTRA_NAME, "test", "features", dataset_origin)
                     probas_original = self.__load_test_probas_intra(dataset_origin, "original", model,
-                                                              classifier)
+                                                                    classifier)
                     probas_depth = self.__load_test_probas_intra(dataset_origin, "depth", model,
-                                                           classifier)
+                                                                 classifier)
                     probas_illumination = self.__load_test_probas_intra(dataset_origin, "illumination",
-                                                                  model, classifier)
+                                                                        model, classifier)
                     probas_saliency = self.__load_test_probas_intra(dataset_origin, "saliency", model,
-                                                              classifier)
+                                                                    classifier)
 
                     stacked_probas = np.stack((probas_depth, probas_illumination, probas_saliency, probas_original),
                                               axis=2)
@@ -536,8 +619,10 @@ class MetalearnerClassifier(BasePredictor):
 
                     y_pred, y_pred_proba = self._predict(model_fitted, stacked_probas)
 
+                    print('\n\nDataset %s classifier %s model %s ' % (
+                    dataset_origin, classifier.get_alias(), model.alias))
                     results = self._evaluate_results(y_pred, labels, names)
-                    print('HTER: %f\nAPCER: %f\nBPCER: %f' % (results[0], results[1], results[2]))
+                    print('HTER: %f\nAPCER: %f\nBPCER: %f\nACC: %f' % (results[0], results[1], results[2], results[3]))
 
                     output_dir = join(self.meta_dataset_output,
                                       self.INTRA_NAME,
@@ -557,9 +642,9 @@ class MetalearnerClassifier(BasePredictor):
     def _perform_meta_classification(self):
 
         self._train_intra_feature_classifier()
-        # self._train_intra_probas_classifier()
-        # self._test_intra_features_classifier()
-        # self._test_intra_probas_classifier()
+        self._train_intra_probas_classifier()
+        self._test_intra_features_classifier()
+        self._test_intra_probas_classifier()
         #
         # self._train_inter_feature_classifier()
         # self._train_inter_probas_classifier()

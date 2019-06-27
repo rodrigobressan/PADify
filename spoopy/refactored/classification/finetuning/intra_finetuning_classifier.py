@@ -81,6 +81,8 @@ class IntraFinetuningClassifier(BaseFinetuner):
 
         y_train = np_utils.to_categorical(y_train, 2)
         y_test = np_utils.to_categorical(y_test, 2)
+
+        print('test')
         # fitting
         #
         num_train_samples = X_train.shape[0]
@@ -94,7 +96,7 @@ class IntraFinetuningClassifier(BaseFinetuner):
         train_data = gen.flow(X_train, y_train, shuffle=True, batch_size=self.BATCH_SIZE)
         test_data = gen.flow(X_test, y_test, shuffle=True, batch_size=self.BATCH_SIZE)
         #
-        model = MobileNetV2(weights=None, input_shape=(224, 224, 3), include_top=False, pooling='avg')
+        # model = MobileNetV2(weights=None, input_shape=(224, 224, 3), include_top=False, pooling='avg')
         finetuned_model, history, time_callback = self.train(train_data, test_data, model.get_model(), num_train_steps,
                                                              num_valid_steps)
 

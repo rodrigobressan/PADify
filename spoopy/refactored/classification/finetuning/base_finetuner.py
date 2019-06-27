@@ -51,7 +51,7 @@ class BaseFinetuner():
     INTER_NAME = "inter"
     META_NAME = "meta"
 
-    BATCH_SIZE = 16
+    BATCH_SIZE = 128
 
     exts = ('*.jpg', '*.png')
     frame_delimiter = '_frame_'
@@ -146,8 +146,8 @@ class BaseFinetuner():
         classification_layer = Dense(len(classes), activation="softmax")(last)
 
         ft_model = Model(model.input, classification_layer)
-        # ft_model = multi_gpu_model(ft_model, gpus=3)
-        ft_model.compile(optimizer=Adam(lr=0.0001), loss='binary_crossentropy', metrics=['accuracy'])
+        # ft_model = multi_gpu_model(ft_model, gpus=2)
+        ft_model.compile(optimizer=Adam(lr=0.01), loss='binary_crossentropy', metrics=['accuracy'])
 
         time_callback = TimeHistory()
 
@@ -159,6 +159,7 @@ class BaseFinetuner():
                                   write_graph=True, write_images=False)
 
         history = ft_model.fit_generator(train_batches,
+                                         verbose=1,
                                          steps_per_epoch=num_train_steps,
                                          epochs=50,
                                          callbacks=[time_callback],

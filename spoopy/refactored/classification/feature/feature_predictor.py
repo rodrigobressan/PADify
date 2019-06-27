@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 import numpy as np
 import os
+from sklearn.metrics import accuracy_score
 
 from refactored.classification.classifier import BaseClassifier
 from refactored.feature_extraction.cnn_model import CnnModel
@@ -117,4 +118,5 @@ class BasePredictor:
 
     def _evaluate_results(self, y_pred, y_test, names_test) -> Tuple[float, float, float]:
         hter, apcer, bpcer = evaluate_hter.evaluate_with_values(y_pred, y_test, names_test)
-        return hter, apcer, bpcer
+        acc = accuracy_score(y_test, y_pred)
+        return hter, apcer, bpcer, acc

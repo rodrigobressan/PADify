@@ -28,8 +28,6 @@ class NoiseExtractor(PropertyExtractor):
                     output_img = join(output_path, frame)
 
                     exec.submit(self.extract_noise, frame, frames_path, noise_path, output_path)
-            else:
-                print('done...')
         print('Extracting frames with noise')
 
     def extract_noise(self, frame, frames_path, noise_path, output_path):

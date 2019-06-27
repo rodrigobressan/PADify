@@ -19,11 +19,11 @@ def get_properties():
     noise_extractor = NoiseExtractor()
     original_extractor = OriginalExtractor()
 
-    properties.append(depth_extractor)
-    properties.append(original_extractor)
-    properties.append(saliency_extractor)
-    properties.append(illumination_extractor)
-    # properties.append(noise_extractor)
+    # properties.append(depth_extractor)
+    # properties.append(original_extractor)
+    # properties.append(saliency_extractor)
+    # properties.append(illumination_extractor)
+    properties.append(noise_extractor)
 
     return properties
 
