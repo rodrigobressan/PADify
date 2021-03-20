@@ -40,7 +40,7 @@ ipython==7.3.0
 ipython-genutils==0.2.0
 itsdangerous==0.24
 jedi==0.13.3
-Jinja2==2.10
+Jinja2==2.11.3
 jsonschema==2.6.0
 jupyter-client==5.2.4
 jupyter-core==4.4.0
