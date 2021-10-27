@@ -17,7 +17,7 @@ cloudpickle==0.5.5
 cycler==0.10.0
 cymem==2.0.2
 Cython==0.29.6
-dask==0.19.1
+dask==2021.10.0
 dataclasses==0.6
 decorator==4.3.0
 dlib==19.15.0
